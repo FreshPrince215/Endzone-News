@@ -1,0 +1,7 @@
+[theme]
+base = "dark"
+primaryColor = "#00FF00"  # Green for Bloomberg feel
+backgroundColor = "#000000"
+secondaryBackgroundColor = "#1A1A1A"
+textColor = "#FFFFFF"
+font = "monospace"
