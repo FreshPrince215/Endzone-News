@@ -78,4 +78,4 @@ df_news = pd.DataFrame(news_items)
 # Sort by published date (newest first) and drop temp column
 df_news = df_news.sort_values(by='_published_parsed', ascending=False).drop(columns=['_published_parsed'])
 
-st.dataframe(df_news).
+st.dataframe(df_news)
