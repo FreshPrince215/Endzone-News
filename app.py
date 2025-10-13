@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
 
 # Page config
-st.set_page_config(page_title="NFL News", layout="wide", page_icon="🏈")
+st.set_page_config(page_title="NFL News Terminal", layout="wide", page_icon="🏈")
 
 # NFL teams list
 NFL_TEAMS = [
@@ -28,7 +28,7 @@ GENERAL_RSS_FEEDS = [
     "https://www.cbssports.com/rss/headlines/nfl/"
 ]
 
-# Team-specific feeds (condensed for performance)
+# Team-specific feeds
 TEAM_FEEDS = {
     'Arizona Cardinals': ['https://www.azcardinals.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=ARI'],
     'Atlanta Falcons': ['https://www.atlantafalcons.com/rss/article', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=ATL'],
@@ -64,7 +64,6 @@ TEAM_FEEDS = {
     'Washington Commanders': ['https://www.commanders.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=WAS']
 }
 
-@st.cache_data(ttl=1800)  # Cache for 30 minutes
 def extract_team(text):
     """Extract team name from text"""
     text_upper = text.upper()
@@ -73,7 +72,6 @@ def extract_team(text):
             return team
     return 'General'
 
-@st.cache_data(ttl=1800)
 def fetch_feed(feed_url, max_entries=30):
     """Fetch a single RSS feed with error handling"""
     try:
@@ -104,7 +102,7 @@ def fetch_feed(feed_url, max_entries=30):
                 })
         
         return articles
-    except Exception as e:
+    except Exception:
         return []
 
 @st.cache_data(ttl=1800)
@@ -157,65 +155,107 @@ def fetch_all_feeds():
     
     return df
 
-# Main app
-st.title("🏈 NFL News Dashboard")
-st.markdown("*Latest news from the past 7 days*")
+# Custom CSS for Bloomberg terminal look
+st.markdown("""
+<style>
+    .main {
+        background-color: #000000;
+    }
+    .news-item {
+        border-left: 3px solid #00FF00;
+        padding: 10px;
+        margin-bottom: 15px;
+        background-color: #1A1A1A;
+        font-family: 'Courier New', monospace;
+    }
+    .news-headline {
+        color: #00FF00;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+    }
+    .news-meta {
+        color: #888888;
+        font-size: 11px;
+        margin-top: 5px;
+    }
+    .ticker {
+        color: #00FF00;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-# Sidebar filters
-st.sidebar.header("Filters")
-team_options = ['All'] + sorted(NFL_TEAMS) + ['General']
-selected_team = st.sidebar.selectbox('Select Team', team_options)
+# Header
+st.markdown("## 🏈 NFL NEWS TERMINAL")
+st.markdown(f"<p class='ticker'>LAST UPDATE: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>", unsafe_allow_html=True)
+
+# Sidebar
+st.sidebar.markdown("### FILTERS")
+team_options = ['ALL TEAMS'] + sorted(NFL_TEAMS) + ['GENERAL']
+selected_team = st.sidebar.selectbox('TEAM', team_options)
 
 # Date filter
 date_filter = st.sidebar.radio(
-    "Time Range",
-    ["Last 24 hours", "Last 3 days", "Last 7 days"],
+    "TIME RANGE",
+    ["24H", "3D", "7D"],
     index=2
 )
 
 # Fetch data
-with st.spinner('Loading NFL news...'):
+with st.spinner('LOADING FEED...'):
     df_all = fetch_all_feeds()
 
 # Apply filters
 if not df_all.empty:
-    # Team filter
-    if selected_team != 'All':
-        filtered = df_all[df_all['team'] == selected_team].copy()
-    else:
+    # Team filter - FIXED
+    if selected_team == 'ALL TEAMS':
         filtered = df_all.copy()
+    elif selected_team == 'GENERAL':
+        filtered = df_all[df_all['team'] == 'General'].copy()
+    else:
+        filtered = df_all[df_all['team'] == selected_team].copy()
     
     # Date filter
     now = datetime.now()
-    if date_filter == "Last 24 hours":
+    if date_filter == "24H":
         cutoff = now - timedelta(days=1)
-    elif date_filter == "Last 3 days":
+    elif date_filter == "3D":
         cutoff = now - timedelta(days=3)
     else:
         cutoff = now - timedelta(days=7)
     
     filtered = filtered[filtered['published'] >= cutoff]
     
-    # Display results
-    st.subheader(f"📰 News for {selected_team}")
-    st.markdown(f"*{len(filtered)} articles found*")
+    # Stats bar
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown(f"<p class='ticker'>ARTICLES: {len(filtered)}</p>", unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"<p class='ticker'>TEAMS: {filtered['team'].nunique()}</p>", unsafe_allow_html=True)
+    with col3:
+        st.markdown(f"<p class='ticker'>FILTER: {selected_team}</p>", unsafe_allow_html=True)
     
+    st.markdown("---")
+    
+    # Display news in terminal style
     if not filtered.empty:
-        # Display with formatting
         for idx, row in filtered.iterrows():
-            col1, col2 = st.columns([4, 1])
-            with col1:
-                st.markdown(f"**[{row['headline']}]({row['link']})**")
-                st.caption(f"{row['team']} • {row['published'].strftime('%b %d, %Y %I:%M %p')}")
-            with col2:
-                st.markdown(f"*{row['team']}*")
-            st.divider()
+            timestamp = row['published'].strftime('%m/%d %H:%M')
+            st.markdown(f"""
+            <div class='news-item'>
+                <a href='{row['link']}' target='_blank' class='news-headline'>{row['headline']}</a>
+                <div class='news-meta'>{timestamp} | {row['team']}</div>
+            </div>
+            """, unsafe_allow_html=True)
     else:
-        st.info(f"No news found for {selected_team} in the selected time range.")
+        st.markdown(f"<p class='ticker'>NO DATA AVAILABLE FOR {selected_team} IN {date_filter}</p>", unsafe_allow_html=True)
 else:
-    st.error("Unable to fetch news. Please try again later.")
+    st.error("FEED ERROR - RETRY")
 
 # Refresh button
-if st.sidebar.button("🔄 Refresh News"):
+st.sidebar.markdown("---")
+if st.sidebar.button("↻ REFRESH FEED"):
     st.cache_data.clear()
     st.rerun()
