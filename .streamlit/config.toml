@@ -1,7 +1,10 @@
 [theme]
 base = "dark"
-primaryColor = "#00FF00"  # Green for Bloomberg feel
-backgroundColor = "#000000"
-secondaryBackgroundColor = "#1A1A1A"
-textColor = "#FFFFFF"
-font = "monospace"
+primaryColor = "#0066CC"  # NFL Blue
+backgroundColor = "#0D1117"
+secondaryBackgroundColor = "#161B22"
+textColor = "#E6EDF3"
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false
