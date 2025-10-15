@@ -1,623 +1,532 @@
+"""
+NFL Terminal - News & Injury Tracker
+A Bloomberg-style terminal for real-time NFL news and injury tracking
+"""
+
 import feedparser
 import pandas as pd
 import re
-from datetime import datetime, timedelta
-import streamlit as st
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import json
 import hashlib
-
-# Page config
-st.set_page_config(page_title="NFL Terminal", layout="wide", page_icon="🏈")
-
-# =============================================================================
-# NFL TEAMS & FEEDS
-# =============================================================================
-
-NFL_TEAMS = [
-    'Arizona Cardinals', 'Atlanta Falcons', 'Baltimore Ravens', 'Buffalo Bills',
-    'Carolina Panthers', 'Chicago Bears', 'Cincinnati Bengals', 'Cleveland Browns',
-    'Dallas Cowboys', 'Denver Broncos', 'Detroit Lions', 'Green Bay Packers',
-    'Houston Texans', 'Indianapolis Colts', 'Jacksonville Jaguars', 'Kansas City Chiefs',
-    'Las Vegas Raiders', 'Los Angeles Chargers', 'Los Angeles Rams', 'Miami Dolphins',
-    'Minnesota Vikings', 'New England Patriots', 'New Orleans Saints', 'New York Giants',
-    'New York Jets', 'Philadelphia Eagles', 'Pittsburgh Steelers', 'San Francisco 49ers',
-    'Seattle Seahawks', 'Tampa Bay Buccaneers', 'Tennessee Titans', 'Washington Commanders'
-]
-
-GENERAL_RSS_FEEDS = [
-    "https://www.nfl.com/feeds/rss/home",
-    "https://www.espn.com/espn/rss/nfl/news",
-    "https://www.cbssports.com/rss/headlines/nfl/"
-]
-
-INJURY_RSS_FEEDS = {
-    'DraftSharks': 'https://www.draftsharks.com/rss/injury-news',
-    'ESPN': 'https://www.espn.com/espn/rss/nfl/news',
-    'RotoWire': 'https://www.rotowire.com/rss/news.php?sport=NFL',
-    'ClutchPoints': 'https://clutchpoints.com/nfl/feed',
-    'CBS Sports': 'https://www.cbssports.com/rss/headlines/nfl'
-}
-
-TEAM_FEEDS = {
-    'Arizona Cardinals': ['https://www.azcardinals.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=ARI'],
-    'Atlanta Falcons': ['https://www.atlantafalcons.com/rss/article', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=ATL'],
-    'Baltimore Ravens': ['https://www.baltimoreravens.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=BAL'],
-    'Buffalo Bills': ['https://www.buffalobills.com/rss/article', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=BUF'],
-    'Carolina Panthers': ['https://www.panthers.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CAR'],
-    'Chicago Bears': ['https://www.chicagobears.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CHI'],
-    'Cincinnati Bengals': ['https://www.bengals.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CIN'],
-    'Cleveland Browns': ['https://www.clevelandbrowns.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CLE'],
-    'Dallas Cowboys': ['https://www.dallascowboys.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DAL'],
-    'Denver Broncos': ['https://www.denverbroncos.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DEN'],
-    'Detroit Lions': ['https://www.detroitlions.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DET'],
-    'Green Bay Packers': ['https://www.packers.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=GB'],
-    'Houston Texans': ['https://www.houstontexans.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=HOU'],
-    'Indianapolis Colts': ['https://www.colts.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=IND'],
-    'Jacksonville Jaguars': ['https://www.jaguars.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=JAX'],
-    'Kansas City Chiefs': ['https://www.chiefs.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=KC'],
-    'Las Vegas Raiders': ['https://www.raiders.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LV'],
-    'Los Angeles Chargers': ['https://www.chargers.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LAC'],
-    'Los Angeles Rams': ['https://www.therams.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LAR'],
-    'Miami Dolphins': ['https://www.miamidolphins.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=MIA'],
-    'Minnesota Vikings': ['https://www.vikings.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=MIN'],
-    'New England Patriots': ['https://www.patriots.com/rss/article', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NE'],
-    'New Orleans Saints': ['https://www.neworleanssaints.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NO'],
-    'New York Giants': ['https://www.giants.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NYG'],
-    'New York Jets': ['https://www.newyorkjets.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NYJ'],
-    'Philadelphia Eagles': ['https://www.philadelphiaeagles.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=PHI'],
-    'Pittsburgh Steelers': ['https://www.steelers.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=PIT'],
-    'San Francisco 49ers': ['https://www.49ers.com/rss/article', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=SF'],
-    'Seattle Seahawks': ['https://www.seahawks.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=SEA'],
-    'Tampa Bay Buccaneers': ['https://www.buccaneers.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=TB'],
-    'Tennessee Titans': ['https://www.tennesseetitans.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=TEN'],
-    'Washington Commanders': ['https://www.commanders.com/rss/news', 'https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=WAS']
-}
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import List, Dict, Optional, Tuple
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import streamlit as st
 
 # =============================================================================
-# INJURY DATABASE
+# CONFIGURATION
 # =============================================================================
 
-INJURY_DATABASE = {
-    'concussion': {
-        'name': 'CONCUSSION',
-        'desc': 'Traumatic brain injury. Requires NFL protocol clearance before return.',
-        'recovery': '1-4 weeks + protocol',
-        'severity': 'SERIOUS',
-        'code': 'CONC'
-    },
-    'acl': {
-        'name': 'ACL TEAR',
-        'desc': 'Anterior cruciate ligament tear. Usually requires surgery.',
-        'recovery': '6-12 months',
-        'severity': 'CRITICAL',
-        'code': 'ACL'
-    },
-    'mcl': {
-        'name': 'MCL SPRAIN',
-        'desc': 'Medial collateral ligament injury. Grade dependent severity.',
-        'recovery': '1-8 weeks',
-        'severity': 'MODERATE',
-        'code': 'MCL'
-    },
-    'hamstring': {
-        'name': 'HAMSTRING',
-        'desc': 'Muscle strain/tear in back of thigh. Common in explosive movements.',
-        'recovery': '2-8 weeks',
-        'severity': 'MODERATE',
-        'code': 'HAMS'
-    },
-    'ankle': {
-        'name': 'ANKLE SPRAIN',
-        'desc': 'Ligament damage. High ankle sprains take longer to heal.',
-        'recovery': '1-6 weeks',
-        'severity': 'MODERATE',
-        'code': 'ANK'
-    },
-    'shoulder': {
-        'name': 'SHOULDER',
-        'desc': 'Sprains, separations, dislocations, or rotator cuff damage.',
-        'recovery': '2-12 weeks',
-        'severity': 'MODERATE',
-        'code': 'SHLDR'
-    },
-    'groin': {
-        'name': 'GROIN STRAIN',
-        'desc': 'Inner thigh muscle strain. Common in lateral movements.',
-        'recovery': '2-6 weeks',
-        'severity': 'MODERATE',
-        'code': 'GROIN'
-    },
-    'knee': {
-        'name': 'KNEE INJURY',
-        'desc': 'Various knee injuries. Requires specific diagnosis.',
-        'recovery': '1-8 weeks',
-        'severity': 'MODERATE',
-        'code': 'KNEE'
-    },
-    'foot': {
-        'name': 'FOOT INJURY',
-        'desc': 'Includes plantar fasciitis, turf toe, fractures.',
-        'recovery': '2-8 weeks',
-        'severity': 'MODERATE',
-        'code': 'FOOT'
-    },
-    'back': {
-        'name': 'BACK INJURY',
-        'desc': 'Muscle strains, herniated discs, or spinal issues.',
-        'recovery': '1-8+ weeks',
-        'severity': 'MODERATE',
-        'code': 'BACK'
-    },
-    'ribs': {
-        'name': 'RIB INJURY',
-        'desc': 'Bruised or fractured ribs. Painful but often playable.',
-        'recovery': '2-6 weeks',
-        'severity': 'MODERATE',
-        'code': 'RIBS'
-    },
-    'quadriceps': {
-        'name': 'QUAD STRAIN',
-        'desc': 'Front thigh muscle strain. Ranges from minor to severe.',
-        'recovery': '2-8 weeks',
-        'severity': 'MODERATE',
-        'code': 'QUAD'
-    },
-    'calf': {
-        'name': 'CALF STRAIN',
-        'desc': 'Lower leg muscle strain. Impacts running ability.',
-        'recovery': '2-6 weeks',
-        'severity': 'MODERATE',
-        'code': 'CALF'
-    },
-    'hip': {
-        'name': 'HIP INJURY',
-        'desc': 'Strains, labral tears, or joint issues. Affects mobility.',
-        'recovery': '2-12 weeks',
-        'severity': 'MODERATE',
-        'code': 'HIP'
-    },
-    'neck': {
-        'name': 'NECK INJURY',
-        'desc': 'Cervical spine issues. Treated with extreme caution.',
-        'recovery': '2-8+ weeks',
-        'severity': 'SERIOUS',
-        'code': 'NECK'
-    },
-    'wrist': {
-        'name': 'WRIST',
-        'desc': 'Bone or ligament injury. Can be braced for some positions.',
-        'recovery': '2-8 weeks',
-        'severity': 'MILD',
-        'code': 'WRST'
-    },
-    'elbow': {
-        'name': 'ELBOW',
-        'desc': 'Sprains, hyperextensions. Common for QBs and linemen.',
-        'recovery': '2-6 weeks',
-        'severity': 'MODERATE',
-        'code': 'ELBW'
-    },
-    'finger': {
-        'name': 'FINGER',
-        'desc': 'Sprains, dislocations, fractures. Common for receivers.',
-        'recovery': '1-4 weeks',
-        'severity': 'MILD',
-        'code': 'FNGR'
-    }
-}
+@st.cache_resource
+def load_config() -> Dict:
+    """Load configuration from config.json with fallback to defaults"""
+    config_path = Path(__file__).parent / 'config.json'
+    
+    if not config_path.exists():
+        st.error("⚠️ config.json not found. Please add it to the repository.")
+        st.info("See README.md for configuration instructions.")
+        st.stop()
+    
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except json.JSONDecodeError as e:
+        st.error(f"❌ Invalid JSON in config.json: {e}")
+        st.stop()
+    except Exception as e:
+        st.error(f"❌ Error loading config.json: {e}")
+        st.stop()
 
-INJURY_KEYWORDS = list(INJURY_DATABASE.keys()) + [
-    'injury', 'injured', 'out', 'questionable', 'doubtful', 'IR', 
-    'inactive', 'limited', 'DNP', 'ruled out'
-]
+# Load configuration
+CONFIG = load_config()
+
+# Extract config sections
+APP = CONFIG.get('app', {})
+TEAMS = CONFIG.get('teams', [])
+RSS_FEEDS = CONFIG.get('rss_feeds', {})
+INJURY_DB = CONFIG.get('injury_database', {})
+INJURY_KEYWORDS = CONFIG.get('injury_keywords', [])
+UI = CONFIG.get('ui', {})
+
+# =============================================================================
+# PAGE CONFIGURATION
+# =============================================================================
+
+st.set_page_config(
+    page_title=APP.get('title', 'NFL Terminal'),
+    page_icon=APP.get('page_icon', '🏈'),
+    layout=APP.get('layout', 'wide'),
+    initial_sidebar_state='expanded'
+)
 
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
 
-def extract_team(text):
-    """Extract team name from text"""
-    text_upper = text.upper()
-    for team in NFL_TEAMS:
-        if team.upper() in text_upper:
-            return team
-    return 'General'
-
-def extract_player_name(text):
-    """Extract player name from title"""
-    patterns = [
-        r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)',
-        r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\s*[\(\,]',
-        r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\s+(?:injury|injured|out|questionable)',
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, text)
-        if match:
-            name = match.group(1).strip()
-            if len(name.split()) >= 2:
-                return name
-    return None
-
-def identify_injury_type(text):
-    """Identify specific injury type from text"""
-    text_lower = text.lower()
-    priority = ['acl', 'mcl', 'concussion', 'hamstring', 'quadriceps', 'groin']
+class TextParser:
+    """Text parsing utilities for extracting information from RSS content"""
     
-    for injury in priority:
-        if injury in text_lower:
-            return injury
+    @staticmethod
+    def extract_team(text: str, teams: List[str]) -> str:
+        """Extract team name from text"""
+        text_upper = text.upper()
+        for team in teams:
+            if team.upper() in text_upper:
+                return team
+        return 'General'
     
-    for injury in INJURY_DATABASE.keys():
-        if injury not in priority and injury in text_lower:
-            return injury
+    @staticmethod
+    def extract_player_name(text: str) -> Optional[str]:
+        """Extract player name using regex patterns"""
+        patterns = [
+            r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)',
+            r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\s*[\(\,]',
+            r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\s+(?:injury|injured|out|questionable)',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, text)
+            if match:
+                name = match.group(1).strip()
+                if len(name.split()) >= 2:
+                    return name
+        return None
     
-    return None
+    @staticmethod
+    def identify_injury_type(text: str, injury_db: Dict) -> Optional[str]:
+        """Identify specific injury type from text"""
+        text_lower = text.lower()
+        
+        # Check priority injuries first
+        priority = ['acl', 'mcl', 'concussion', 'hamstring', 'quadriceps', 'groin']
+        for injury in priority:
+            if injury in text_lower:
+                return injury
+        
+        # Check remaining injuries
+        for injury in injury_db.keys():
+            if injury not in priority and injury in text_lower:
+                return injury
+        
+        return None
 
-def fetch_feed(feed_url, max_entries=30):
-    """Fetch a single RSS feed with error handling"""
-    try:
-        feed = feedparser.parse(feed_url)
-        seven_days_ago = datetime.now() - timedelta(days=7)
+class FeedFetcher:
+    """RSS feed fetching and processing"""
+    
+    def __init__(self, days_lookback: int = 7, max_entries: int = 30):
+        self.days_lookback = days_lookback
+        self.max_entries = max_entries
+        self.cutoff_date = datetime.now() - timedelta(days=days_lookback)
+    
+    def fetch_single_feed(self, url: str) -> List[Dict]:
+        """Fetch and parse a single RSS feed"""
+        try:
+            feed = feedparser.parse(url)
+            articles = []
+            
+            for entry in feed.entries[:self.max_entries]:
+                title = entry.get('title', 'No Title')
+                link = entry.get('link', '')
+                
+                # Parse publication date
+                pub_parsed = entry.get('published_parsed') or entry.get('updated_parsed')
+                pub_date = self._parse_date(pub_parsed)
+                
+                # Only include recent articles
+                if pub_date >= self.cutoff_date:
+                    articles.append({
+                        'title': title,
+                        'link': link,
+                        'published': pub_date
+                    })
+            
+            return articles
+        except Exception as e:
+            # Silently fail individual feeds to not disrupt entire fetch
+            return []
+    
+    @staticmethod
+    def _parse_date(pub_parsed) -> datetime:
+        """Parse publication date with fallback"""
+        if pub_parsed:
+            try:
+                return datetime(*pub_parsed[:6])
+            except (TypeError, ValueError):
+                pass
+        return datetime.now()
+    
+    def fetch_multiple_feeds(self, feeds: List[str], max_workers: int = 10) -> List[Dict]:
+        """Fetch multiple feeds in parallel"""
         articles = []
         
-        for entry in feed.entries[:max_entries]:
-            title = entry.get('title', 'No Title')
-            link = entry.get('link', '')
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(self.fetch_single_feed, url): url for url in feeds}
             
-            pub_parsed = entry.get('published_parsed') or entry.get('updated_parsed')
-            if pub_parsed:
-                try:
-                    pub_date = datetime(*pub_parsed[:6])
-                except (TypeError, ValueError):
-                    pub_date = datetime.now()
-            else:
-                pub_date = datetime.now()
-            
-            if pub_date >= seven_days_ago:
-                articles.append({
-                    'title': title,
-                    'link': link,
-                    'published': pub_date
-                })
+            for future in as_completed(futures):
+                articles.extend(future.result())
         
         return articles
-    except Exception:
-        return []
+
+class DataProcessor:
+    """Data processing and cleaning utilities"""
+    
+    @staticmethod
+    def create_hash(text: str) -> str:
+        """Create MD5 hash for deduplication"""
+        return hashlib.md5(text.encode()).hexdigest()
+    
+    @staticmethod
+    def deduplicate_dataframe(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+        """Remove duplicates based on hash of specified columns"""
+        if df.empty:
+            return df
+        
+        hash_text = df[columns].astype(str).agg(''.join, axis=1)
+        df['hash'] = hash_text.apply(DataProcessor.create_hash)
+        df = df.drop_duplicates(subset=['hash']).drop(columns=['hash'])
+        
+        return df
+    
+    @staticmethod
+    def filter_by_date(df: pd.DataFrame, hours: int) -> pd.DataFrame:
+        """Filter dataframe by date range"""
+        if df.empty:
+            return df
+        
+        cutoff = datetime.now() - timedelta(hours=hours)
+        return df[df['published'] >= cutoff].copy()
+    
+    @staticmethod
+    def filter_by_team(df: pd.DataFrame, team: str) -> pd.DataFrame:
+        """Filter dataframe by team"""
+        if df.empty or team == 'ALL TEAMS':
+            return df.copy()
+        
+        if team == 'GENERAL':
+            return df[df['team'] == 'General'].copy()
+        
+        return df[df['team'] == team].copy()
 
 # =============================================================================
-# DATA FETCHING
+# DATA FETCHING FUNCTIONS
 # =============================================================================
 
-@st.cache_data(ttl=1800)
-def fetch_all_news():
-    """Fetch all news feeds in parallel"""
+@st.cache_data(ttl=APP.get('cache_ttl', 1800), show_spinner=False)
+def fetch_news_data() -> pd.DataFrame:
+    """Fetch and process all news feeds"""
+    fetcher = FeedFetcher(
+        days_lookback=APP.get('days_lookback', 7),
+        max_entries=30
+    )
+    parser = TextParser()
     news_items = []
     
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        general_futures = {executor.submit(fetch_feed, url): 'General' for url in GENERAL_RSS_FEEDS}
-        
-        for future in as_completed(general_futures):
-            articles = future.result()
-            for article in articles:
-                detected_team = extract_team(article['title'])
-                news_items.append({
-                    'team': detected_team,
-                    'headline': article['title'],
-                    'link': article['link'],
-                    'published': article['published']
-                })
+    # Fetch general news feeds
+    general_feeds = [f['url'] for f in RSS_FEEDS.get('general_news', []) if f.get('enabled', True)]
+    articles = fetcher.fetch_multiple_feeds(general_feeds, max_workers=APP.get('max_workers', 10))
     
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        team_futures = {}
-        for team, feeds in TEAM_FEEDS.items():
-            for feed_url in feeds:
-                team_futures[executor.submit(fetch_feed, feed_url)] = team
+    for article in articles:
+        team = parser.extract_team(article['title'], TEAMS)
+        news_items.append({
+            'team': team,
+            'headline': article['title'],
+            'link': article['link'],
+            'published': article['published']
+        })
+    
+    # Fetch team-specific feeds
+    team_feeds_dict = RSS_FEEDS.get('team_feeds', {})
+    for team, feed_urls in team_feeds_dict.items():
+        articles = fetcher.fetch_multiple_feeds(feed_urls, max_workers=APP.get('max_workers', 10))
         
-        for future in as_completed(team_futures):
-            team = team_futures[future]
-            articles = future.result()
-            for article in articles:
-                news_items.append({
-                    'team': team,
-                    'headline': article['title'],
-                    'link': article['link'],
-                    'published': article['published']
-                })
+        for article in articles:
+            news_items.append({
+                'team': team,
+                'headline': article['title'],
+                'link': article['link'],
+                'published': article['published']
+            })
+    
+    # Create and clean dataframe
+    if not news_items:
+        return pd.DataFrame()
     
     df = pd.DataFrame(news_items)
-    if not df.empty:
-        df['hash'] = df.apply(lambda x: hashlib.md5(f"{x['headline']}{x['link']}".encode()).hexdigest(), axis=1)
-        df = df.drop_duplicates(subset=['hash']).drop(columns=['hash'])
-        df = df.sort_values('published', ascending=False)
+    df = DataProcessor.deduplicate_dataframe(df, ['headline', 'link'])
+    df = df.sort_values('published', ascending=False)
     
     return df
 
-@st.cache_data(ttl=1800)
-def fetch_all_injuries():
-    """Fetch injury-specific feeds"""
+@st.cache_data(ttl=APP.get('cache_ttl', 1800), show_spinner=False)
+def fetch_injury_data() -> pd.DataFrame:
+    """Fetch and process all injury feeds"""
+    fetcher = FeedFetcher(
+        days_lookback=APP.get('days_lookback', 7),
+        max_entries=50
+    )
+    parser = TextParser()
     injuries = []
     
-    for source_name, url in INJURY_RSS_FEEDS.items():
-        try:
-            articles = fetch_feed(url, max_entries=50)
+    # Fetch injury-specific feeds
+    injury_feeds = {f['name']: f['url'] for f in RSS_FEEDS.get('injury_feeds', []) if f.get('enabled', True)}
+    
+    for source_name, url in injury_feeds.items():
+        articles = fetcher.fetch_single_feed(url)
+        
+        for article in articles:
+            title = article['title']
+            content = title.lower()
             
-            for article in articles:
-                title = article['title']
-                content = title.lower()
+            # Check if article contains injury keywords
+            has_injury = any(kw in content for kw in INJURY_KEYWORDS)
+            
+            if has_injury:
+                player = parser.extract_player_name(title)
+                team = parser.extract_team(title, TEAMS)
+                injury_type = parser.identify_injury_type(content, INJURY_DB)
+                injury_info = INJURY_DB.get(injury_type, {})
                 
-                has_injury = any(kw in content for kw in INJURY_KEYWORDS)
-                
-                if has_injury:
-                    player = extract_player_name(title)
-                    team = extract_team(title)
-                    injury_type = identify_injury_type(content)
-                    injury_info = INJURY_DATABASE.get(injury_type, {})
-                    
-                    injuries.append({
-                        'team': team,
-                        'player': player if player else 'Unknown',
-                        'headline': title,
-                        'link': article['link'],
-                        'published': article['published'],
-                        'source': source_name,
-                        'injury_type': injury_type,
-                        'injury_code': injury_info.get('code', 'INJ'),
-                        'injury_name': injury_info.get('name', 'INJURY'),
-                        'description': injury_info.get('desc', 'Injury details not available'),
-                        'recovery': injury_info.get('recovery', 'Variable'),
-                        'severity': injury_info.get('severity', 'UNKNOWN')
-                    })
-        except Exception:
-            pass
+                injuries.append({
+                    'team': team,
+                    'player': player or 'Unknown',
+                    'headline': title,
+                    'link': article['link'],
+                    'published': article['published'],
+                    'source': source_name,
+                    'injury_type': injury_type,
+                    'injury_code': injury_info.get('code', 'INJ'),
+                    'injury_name': injury_info.get('name', 'INJURY'),
+                    'description': injury_info.get('description', 'Injury details not available'),
+                    'recovery': injury_info.get('recovery', 'Variable'),
+                    'severity': injury_info.get('severity', 'UNKNOWN')
+                })
+    
+    # Create and clean dataframe
+    if not injuries:
+        return pd.DataFrame()
     
     df = pd.DataFrame(injuries)
-    if not df.empty:
-        df['hash'] = df.apply(lambda x: hashlib.md5(f"{x['headline']}{x['link']}".encode()).hexdigest(), axis=1)
-        df = df.drop_duplicates(subset=['hash']).drop(columns=['hash'])
-        df = df.sort_values('published', ascending=False)
+    df = DataProcessor.deduplicate_dataframe(df, ['headline', 'link'])
+    df = df.sort_values('published', ascending=False)
     
     return df
 
 # =============================================================================
-# STYLING
+# UI COMPONENTS
 # =============================================================================
 
-st.markdown("""
-<style>
-    .main {
-        background-color: #000000;
-    }
-    .news-item {
-        border-left: 3px solid #00FF00;
-        padding: 10px;
-        margin-bottom: 15px;
-        background-color: #1A1A1A;
-        font-family: 'Courier New', monospace;
-    }
-    .injury-item {
-        border-left: 3px solid #FF0000;
-        padding: 10px;
-        margin-bottom: 15px;
-        background-color: #1A1A1A;
-        font-family: 'Courier New', monospace;
-    }
-    .news-headline {
-        color: #00FF00;
-        font-size: 14px;
-        font-weight: bold;
-        text-decoration: none;
-    }
-    .injury-headline {
-        color: #FF6666;
-        font-size: 14px;
-        font-weight: bold;
-        text-decoration: none;
-    }
-    .news-meta {
-        color: #888888;
-        font-size: 11px;
-        margin-top: 5px;
-    }
-    .injury-meta {
-        color: #888888;
-        font-size: 11px;
-        margin-top: 5px;
-    }
-    .injury-details {
-        background-color: #0D0D0D;
-        padding: 8px;
-        margin-top: 8px;
-        border-left: 2px solid #FF0000;
-        font-size: 11px;
-        color: #CCCCCC;
-    }
-    .severity-critical {
-        color: #FF0000;
-        font-weight: bold;
-    }
-    .severity-serious {
-        color: #FF6600;
-        font-weight: bold;
-    }
-    .severity-moderate {
-        color: #FFAA00;
-        font-weight: bold;
-    }
-    .severity-mild {
-        color: #FFFF00;
-        font-weight: bold;
-    }
-    .ticker {
-        color: #00FF00;
-        font-family: 'Courier New', monospace;
-        font-size: 12px;
-    }
-    .stRadio > label {
-        color: #00FF00;
-    }
-    .stSelectbox > label {
-        color: #00FF00;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# =============================================================================
-# MAIN APP
-# =============================================================================
-
-# Header
-st.markdown("## 🏈 NFL TERMINAL")
-st.markdown(f"<p class='ticker'>SYSTEM TIME: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>", unsafe_allow_html=True)
-
-# Sidebar Navigation
-st.sidebar.markdown("### TERMINAL MODE")
-mode = st.sidebar.radio("SELECT MODE", ["NEWS", "INJURIES"])
-
-st.sidebar.markdown("---")
-st.sidebar.markdown("### FILTERS")
-
-# Common filters
-team_options = ['ALL TEAMS'] + sorted(NFL_TEAMS) + ['GENERAL']
-selected_team = st.sidebar.selectbox('TEAM', team_options)
-
-date_filter = st.sidebar.radio("TIME RANGE", ["24H", "3D", "7D"], index=2)
-
-# =============================================================================
-# NEWS MODE
-# =============================================================================
-
-if mode == "NEWS":
-    with st.spinner('LOADING NEWS FEED...'):
-        df_all = fetch_all_news()
+def apply_custom_css():
+    """Apply custom CSS styling"""
+    theme = UI.get('theme', {})
     
-    if not df_all.empty:
-        # Filter by team
-        if selected_team == 'ALL TEAMS':
-            filtered = df_all.copy()
-        elif selected_team == 'GENERAL':
-            filtered = df_all[df_all['team'] == 'General'].copy()
-        else:
-            filtered = df_all[df_all['team'] == selected_team].copy()
-        
-        # Filter by date
-        now = datetime.now()
-        if date_filter == "24H":
-            cutoff = now - timedelta(days=1)
-        elif date_filter == "3D":
-            cutoff = now - timedelta(days=3)
-        else:
-            cutoff = now - timedelta(days=7)
-        
-        filtered = filtered[filtered['published'] >= cutoff]
-        
-        # Stats
+    st.markdown(f"""
+    <style>
+        .main {{
+            background-color: {theme.get('background', '#000000')};
+        }}
+        .news-item {{
+            border-left: 3px solid {theme.get('primary_color', '#00FF00')};
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #1A1A1A;
+            font-family: 'Courier New', monospace;
+        }}
+        .injury-item {{
+            border-left: 3px solid {theme.get('secondary_color', '#FF0000')};
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #1A1A1A;
+            font-family: 'Courier New', monospace;
+        }}
+        .news-headline {{
+            color: {theme.get('primary_color', '#00FF00')};
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+        }}
+        .injury-headline {{
+            color: #FF6666;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+        }}
+        .news-meta, .injury-meta {{
+            color: {theme.get('meta_color', '#888888')};
+            font-size: 11px;
+            margin-top: 5px;
+        }}
+        .injury-details {{
+            background-color: #0D0D0D;
+            padding: 8px;
+            margin-top: 8px;
+            border-left: 2px solid {theme.get('secondary_color', '#FF0000')};
+            font-size: 11px;
+            color: #CCCCCC;
+        }}
+        .severity-critical {{ color: #FF0000; font-weight: bold; }}
+        .severity-serious {{ color: #FF6600; font-weight: bold; }}
+        .severity-moderate {{ color: #FFAA00; font-weight: bold; }}
+        .severity-mild {{ color: #FFFF00; font-weight: bold; }}
+        .ticker {{
+            color: {theme.get('primary_color', '#00FF00')};
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }}
+        .stRadio > label, .stSelectbox > label {{
+            color: {theme.get('primary_color', '#00FF00')};
+        }}
+    </style>
+    """, unsafe_allow_html=True)
+
+def render_header():
+    """Render page header"""
+    st.markdown(f"## {APP.get('page_icon', '🏈')} {APP.get('title', 'NFL TERMINAL').upper()}")
+    st.markdown(f"<p class='ticker'>SYSTEM TIME: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>", 
+                unsafe_allow_html=True)
+
+def render_sidebar_filters() -> Tuple[str, str, str]:
+    """Render sidebar filters and return selections"""
+    st.sidebar.markdown("### TERMINAL MODE")
+    mode = st.sidebar.radio("SELECT MODE", ["NEWS", "INJURIES"])
+    
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### FILTERS")
+    
+    # Team filter
+    team_options = ['ALL TEAMS'] + sorted(TEAMS) + ['GENERAL']
+    selected_team = st.sidebar.selectbox('TEAM', team_options)
+    
+    # Date filter
+    time_ranges = UI.get('time_ranges', ["24H", "3D", "7D"])
+    default_range = UI.get('default_time_range', '7D')
+    date_filter = st.sidebar.radio("TIME RANGE", time_ranges, 
+                                   index=time_ranges.index(default_range) if default_range in time_ranges else 0)
+    
+    return mode, selected_team, date_filter
+
+def render_stats_bar(df: pd.DataFrame, mode: str, team: str):
+    """Render statistics bar"""
+    if mode == "NEWS":
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.markdown(f"<p class='ticker'>ARTICLES: {len(filtered)}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p class='ticker'>ARTICLES: {len(df)}</p>", unsafe_allow_html=True)
         with col2:
-            st.markdown(f"<p class='ticker'>TEAMS: {filtered['team'].nunique()}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p class='ticker'>TEAMS: {df['team'].nunique()}</p>", unsafe_allow_html=True)
         with col3:
-            st.markdown(f"<p class='ticker'>FILTER: {selected_team}</p>", unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        # Display news
-        if not filtered.empty:
-            for idx, row in filtered.iterrows():
-                timestamp = row['published'].strftime('%m/%d %H:%M')
-                st.markdown(f"""
-                <div class='news-item'>
-                    <a href='{row['link']}' target='_blank' class='news-headline'>{row['headline']}</a>
-                    <div class='news-meta'>{timestamp} | {row['team']}</div>
-                </div>
-                """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"<p class='ticker'>NO NEWS DATA FOR {selected_team} IN {date_filter}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p class='ticker'>FILTER: {team}</p>", unsafe_allow_html=True)
     else:
-        st.error("NEWS FEED ERROR - RETRY")
-
-# =============================================================================
-# INJURY MODE
-# =============================================================================
-
-else:
-    # Additional injury filters
-    injury_type_options = ['ALL INJURIES'] + sorted(list(set([v['name'] for v in INJURY_DATABASE.values()])))
-    selected_injury_type = st.sidebar.selectbox('INJURY TYPE', injury_type_options)
-    
-    severity_options = ['ALL', 'CRITICAL', 'SERIOUS', 'MODERATE', 'MILD']
-    selected_severity = st.sidebar.selectbox('SEVERITY', severity_options)
-    
-    with st.spinner('LOADING INJURY FEED...'):
-        df_injuries = fetch_all_injuries()
-    
-    if not df_injuries.empty:
-        # Filter by team
-        if selected_team == 'ALL TEAMS':
-            filtered = df_injuries.copy()
-        elif selected_team == 'GENERAL':
-            filtered = df_injuries[df_injuries['team'] == 'General'].copy()
-        else:
-            filtered = df_injuries[df_injuries['team'] == selected_team].copy()
-        
-        # Filter by injury type
-        if selected_injury_type != 'ALL INJURIES':
-            filtered = filtered[filtered['injury_name'] == selected_injury_type]
-        
-        # Filter by severity
-        if selected_severity != 'ALL':
-            filtered = filtered[filtered['severity'] == selected_severity]
-        
-        # Filter by date
-        now = datetime.now()
-        if date_filter == "24H":
-            cutoff = now - timedelta(days=1)
-        elif date_filter == "3D":
-            cutoff = now - timedelta(days=3)
-        else:
-            cutoff = now - timedelta(days=7)
-        
-        filtered = filtered[filtered['published'] >= cutoff]
-        
-        # Stats
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.markdown(f"<p class='ticker'>INJURIES: {len(filtered)}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p class='ticker'>INJURIES: {len(df)}</p>", unsafe_allow_html=True)
         with col2:
-            st.markdown(f"<p class='ticker'>PLAYERS: {filtered['player'].nunique()}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p class='ticker'>PLAYERS: {df['player'].nunique()}</p>", unsafe_allow_html=True)
         with col3:
-            critical = len(filtered[filtered['severity'] == 'CRITICAL'])
+            critical = len(df[df['severity'] == 'CRITICAL'])
             st.markdown(f"<p class='ticker'>CRITICAL: {critical}</p>", unsafe_allow_html=True)
         with col4:
-            st.markdown(f"<p class='ticker'>FILTER: {selected_team}</p>", unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        # Display injuries
-        if not filtered.empty:
-            for idx, row in filtered.iterrows():
-                timestamp = row['published'].strftime('%m/%d %H:%M')
-                severity_class = f"severity-{row['severity'].lower()}"
-                
-                st.markdown(f"""
-                <div class='injury-item'>
-                    <a href='{row['link']}' target='_blank' class='injury-headline'>{row['headline']}</a>
-                    <div class='injury-meta'>{timestamp} | {row['player']} | {row['team']} | <span class='{severity_class}'>[{row['injury_code']}]</span></div>
-                    <div class='injury-details'>
-                        <strong>INJURY:</strong> {row['injury_name']}<br>
-                        <strong>SEVERITY:</strong> <span class='{severity_class}'>{row['severity']}</span><br>
-                        <strong>RECOVERY:</strong> {row['recovery']}<br>
-                        <strong>DETAILS:</strong> {row['description']}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"<p class='ticker'>NO INJURY DATA FOR {selected_team} IN {date_filter}</p>", unsafe_allow_html=True)
-    else:
-        st.error("INJURY FEED ERROR - RETRY")
+            st.markdown(f"<p class='ticker'>FILTER: {team}</p>", unsafe_allow_html=True)
 
-# Refresh button
-st.sidebar.markdown("---")
-if st.sidebar.button("↻ REFRESH FEED"):
-    st.cache_data.clear()
-    st.rerun()
+def render_news_item(row: pd.Series):
+    """Render a single news item"""
+    timestamp = row['published'].strftime('%m/%d %H:%M')
+    st.markdown(f"""
+    <div class='news-item'>
+        <a href='{row['link']}' target='_blank' class='news-headline'>{row['headline']}</a>
+        <div class='news-meta'>{timestamp} | {row['team']}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def render_injury_item(row: pd.Series):
+    """Render a single injury item"""
+    timestamp = row['published'].strftime('%m/%d %H:%M')
+    severity_class = f"severity-{row['severity'].lower()}"
+    
+    st.markdown(f"""
+    <div class='injury-item'>
+        <a href='{row['link']}' target='_blank' class='injury-headline'>{row['headline']}</a>
+        <div class='injury-meta'>{timestamp} | {row['player']} | {row['team']} | 
+            <span class='{severity_class}'>[{row['injury_code']}]</span>
+        </div>
+        <div class='injury-details'>
+            <strong>INJURY:</strong> {row['injury_name']}<br>
+            <strong>SEVERITY:</strong> <span class='{severity_class}'>{row['severity']}</span><br>
+            <strong>RECOVERY:</strong> {row['recovery']}<br>
+            <strong>DETAILS:</strong> {row['description']}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# =============================================================================
+# MAIN APPLICATION
+# =============================================================================
+
+def main():
+    """Main application logic"""
+    apply_custom_css()
+    render_header()
+    
+    # Get sidebar selections
+    mode, selected_team, date_filter = render_sidebar_filters()
+    
+    # Additional filters for injury mode
+    selected_injury_type = None
+    selected_severity = None
+    
+    if mode == "INJURIES":
+        injury_type_options = ['ALL INJURIES'] + sorted(list(set([v['name'] for v in INJURY_DB.values()])))
+        selected_injury_type = st.sidebar.selectbox('INJURY TYPE', injury_type_options)
+        
+        severity_options = ['ALL', 'CRITICAL', 'SERIOUS', 'MODERATE', 'MILD']
+        selected_severity = st.sidebar.selectbox('SEVERITY', severity_options)
+    
+    # Fetch data based on mode
+    with st.spinner(f'LOADING {mode} FEED...'):
+        if mode == "NEWS":
+            df = fetch_news_data()
+        else:
+            df = fetch_injury_data()
+    
+    # Check if data was fetched
+    if df.empty:
+        st.error(f"{mode} FEED ERROR - RETRY")
+        return
+    
+    # Apply filters
+    df_filtered = DataProcessor.filter_by_team(df, selected_team)
+    
+    # Apply date filter
+    date_hours = {'24H': 24, '3D': 72, '7D': 168}
+    df_filtered = DataProcessor.filter_by_date(df_filtered, date_hours.get(date_filter, 168))
+    
+    # Apply injury-specific filters
+    if mode == "INJURIES":
+        if selected_injury_type != 'ALL INJURIES':
+            df_filtered = df_filtered[df_filtered['injury_name'] == selected_injury_type]
+        
+        if selected_severity != 'ALL':
+            df_filtered = df_filtered[df_filtered['severity'] == selected_severity]
+    
+    # Render stats and content
+    render_stats_bar(df_filtered, mode, selected_team)
+    st.markdown("---")
+    
+    # Display items
+    if not df_filtered.empty:
+        for _, row in df_filtered.iterrows():
+            if mode == "NEWS":
+                render_news_item(row)
+            else:
+                render_injury_item(row)
+    else:
+        st.markdown(f"<p class='ticker'>NO {mode} DATA FOR {selected_team} IN {date_filter}</p>", 
+                   unsafe_allow_html=True)
+    
+    # Refresh button
+    st.sidebar.markdown("---")
+    if st.sidebar.button("↻ REFRESH FEED"):
+        st.cache_data.clear()
+        st.rerun()
+
+if __name__ == "__main__":
+    main()
