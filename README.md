@@ -1,127 +1,168 @@
-# NFL News Terminal 🏈
+# 🏈 NFL Terminal
 
-A  news aggregator for NFL data. Real-time news feeds from all 32 NFL teams and major sports outlets, displayed in a professional interface.
+A Bloomberg-style terminal for real-time NFL news and injury tracking with detailed medical information.
 
-![Terminal Style](https://img.shields.io/badge/style-terminal-green)
-![Python](https://img.shields.io/badge/python-3.8+-blue)
-![Streamlit](https://img.shields.io/badge/streamlit-1.28+-red)
+![NFL Terminal](https://img.shields.io/badge/streamlit-1.29.0-FF4B4B?logo=streamlit)
+![Python](https://img.shields.io/badge/python-3.8+-blue?logo=python)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Features
+## ✨ Features
 
-- **Real-Time News Aggregation**: Pulls from 70+ RSS feeds across all 32 NFL teams
-- **Team-Specific Filtering**: View news for individual teams or league-wide updates
-- **Time Range Filters**: 24H, 3D, or 7D news views
-- **Smart Caching**: 30-minute cache for optimal performance
-- **Parallel Feed Fetching**: Multi-threaded RSS parsing for speed
-- **Auto-Deduplication**: Removes duplicate stories across sources
+### 📰 News Mode
+- Real-time aggregation from 30+ NFL sources
+- Team-specific and general news feeds
+- Smart deduplication
+- Last 7 days of articles
+- Filter by team and time range
 
-## Data Sources
+### 🏥 Injury Mode
+- Comprehensive injury tracking
+- Detailed medical information for 18+ injury types
+- Severity classifications (Critical, Serious, Moderate, Mild)
+- Recovery time estimates
+- Player and team tracking
+- Multiple injury-focused sources
 
-### General NFL News
-- NFL.com Official Feed
-- ESPN NFL News
-- CBS Sports NFL
+### 🎨 UI Features
+- Bloomberg terminal-inspired dark theme
+- Real-time updates with 30-minute cache
+- Parallel feed fetching for speed
+- Mobile responsive
+- Clean, terminal-style interface
 
-### Team-Specific Feeds
-- Official team websites (all 32 teams)
-- RotoWire team coverage
-- 70+ total RSS feeds
+## 🚀 Quick Start
 
-## Installation
+### Local Development
 
-### Prerequisites
-- Python 3.8 or higher
-- pip package manager
-
-
-
-
-### Theme Customization
-
-Edit `.streamlit/config.toml` to customize colors:
-
-```toml
-[theme]
-base = "dark"
-primaryColor = "#00FF00"  # Terminal green
-backgroundColor = "#000000"
-secondaryBackgroundColor = "#1A1A1A"
-textColor = "#FFFFFF"
-font = "monospace"
+1. **Clone the repository**
+```bash
+   git clone https://github.com/yourusername/nfl-terminal.git
+   cd nfl-terminal
 ```
 
-### Cache Settings
-
-Modify cache duration in `app.py`:
-```python
-@st.cache_data(ttl=1800)  # 1800 seconds = 30 minutes
+2. **Install dependencies**
+```bash
+   pip install -r requirements.txt
 ```
 
-## Usage
-
-### Filter by Team
-Use the sidebar dropdown to select:
-- **ALL TEAMS**: View all NFL news
-- **Specific Team**: Filter to one team (e.g., "Dallas Cowboys")
-- **GENERAL**: League-wide news only
-
-### Time Ranges
-- **24H**: Last 24 hours
-- **3D**: Last 3 days
-- **7D**: Last 7 days (default)
-
-### Refresh Data
-Click "↻ REFRESH FEED" in the sidebar to clear cache and fetch latest news.
-
-## Project Structure
-
-```
-nfl-news-terminal/
-│
-├── app.py                 # Main Streamlit application
-├── requirements.txt       # Python dependencies
-├── .streamlit/
-│   └── config.toml       # Streamlit theme configuration
-├── README.md             # This file
-└── .gitignore            # Git ignore file
+3. **Run the app**
+```bash
+   streamlit run app.py
 ```
 
-## Technical Details
+4. **Open browser**
+   - Navigate to `http://localhost:8501`
 
-### Performance Optimizations
-- **Parallel Fetching**: 10 concurrent workers via ThreadPoolExecutor
-- **Smart Caching**: 30-minute TTL on feed data
-- **Entry Limiting**: Max 30 entries per feed
-- **Hash-Based Deduplication**: MD5 hashing to remove duplicates
+### ☁️ Cloud Deployment (Streamlit Cloud)
 
-### Error Handling
-- Graceful feed failures (continues if feeds timeout)
-- Fallback date parsing
-- Safe team extraction with regex
-
-## Dependencies
-
-```
-streamlit>=1.28.0
-feedparser>=6.0.10
-pandas>=2.0.0
-python-dateutil>=2.8.2
+1. **Push to GitHub**
+```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin https://github.com/yourusername/nfl-terminal.git
+   git push -u origin main
 ```
 
+2. **Deploy**
+   - Go to [share.streamlit.io](https://share.streamlit.io)
+   - Click "New app"
+   - Select your repository
+   - Main file: `app.py`
+   - Click "Deploy"
 
+## ⚙️ Configuration
 
-## Roadmap
+All settings are in `config.json`:
 
-- [ ] Add player-specific news filtering
-- [ ] Integrate injury reports
-- [ ] Add sentiment analysis
-- [ ] Include betting odds data
-- [ ] Export news to CSV/PDF
-- [ ] Email alerts for team news
-- [ ] Mobile-responsive design improvements
+### App Settings
+```json
+{
+  "app": {
+    "cache_ttl": 1800,      // Cache duration in seconds
+    "max_workers": 10,       // Parallel fetch workers
+    "days_lookback": 7       // How many days of history
+  }
+}
+```
 
+### Adding RSS Feeds
+```json
+{
+  "rss_feeds": {
+    "general_news": [
+      {
+        "name": "Your Source",
+        "url": "https://example.com/rss",
+        "enabled": true
+      }
+    ]
+  }
+}
+```
 
+### Adding Injury Types
+```json
+{
+  "injury_database": {
+    "injury_name": {
+      "name": "DISPLAY NAME",
+      "description": "Medical description",
+      "recovery": "Time range",
+      "severity": "CRITICAL|SERIOUS|MODERATE|MILD",
+      "code": "3-5 LETTER CODE"
+    }
+  }
+}
+```
 
-This application aggregates publicly available RSS feeds for informational purposes. All news content is owned by the respective publishers. This is not affiliated with the NFL.
+## 📊 Data Sources
 
----
+### News Sources
+- NFL Official RSS
+- ESPN NFL
+- CBS Sports
+- All 32 team official feeds
+- RotoWire team feeds
+
+### Injury Sources
+- DraftSharks Injury News
+- RotoWire NFL
+- ClutchPoints
+- ESPN NFL
+- CBS Sports
+
+## 🔧 Tech Stack
+
+- **Streamlit** - Web framework
+- **Feedparser** - RSS parsing
+- **Pandas** - Data processing
+- **ThreadPoolExecutor** - Parallel fetching
+
+## 📈 Performance
+
+- ⚡ Fetches 1000+ articles in ~3 seconds
+- 💾 30-minute cache for optimal performance
+- 🔄 Smart deduplication
+- 🚀 Parallel feed processing (10 workers)
+
+## 🎨 Customization
+
+### Change Theme Colors
+Edit `config.json`:
+```json
+{
+  "ui": {
+    "theme": {
+      "background": "#000000",
+      "primary_color": "#00FF00",
+      "secondary_color": "#FF0000"
+    }
+  }
+}
+```
+
+### Disable Feeds
+Set `"enabled": false` in `config.json`
+
+## 📝 Project Structure
