@@ -1,6 +1,6 @@
 """
-NFL Terminal - News & Injury Tracker
-A Bloomberg-style terminal for real-time NFL news and injury tracking
+NFL Terminal - News & Injury Tracker (Enhanced with ESPN API)
+Real-time news aggregation + Official ESPN injury data
 """
 
 import feedparser
@@ -8,6 +8,7 @@ import pandas as pd
 import re
 import json
 import hashlib
+import requests
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
@@ -20,12 +21,11 @@ import streamlit as st
 
 @st.cache_resource
 def load_config() -> Dict:
-    """Load configuration from config.json with fallback to defaults"""
+    """Load configuration from config.json"""
     config_path = Path(__file__).parent / 'config.json'
     
     if not config_path.exists():
         st.error("⚠️ config.json not found. Please add it to the repository.")
-        st.info("See README.md for configuration instructions.")
         st.stop()
     
     try:
@@ -38,15 +38,11 @@ def load_config() -> Dict:
         st.error(f"❌ Error loading config.json: {e}")
         st.stop()
 
-# Load configuration
 CONFIG = load_config()
-
-# Extract config sections
 APP = CONFIG.get('app', {})
 TEAMS = CONFIG.get('teams', [])
 RSS_FEEDS = CONFIG.get('rss_feeds', {})
 INJURY_DB = CONFIG.get('injury_database', {})
-INJURY_KEYWORDS = CONFIG.get('injury_keywords', [])
 UI = CONFIG.get('ui', {})
 
 # =============================================================================
@@ -61,11 +57,180 @@ st.set_page_config(
 )
 
 # =============================================================================
-# UTILITY FUNCTIONS
+# ESPN API CLIENT
+# =============================================================================
+
+class ESPNInjuryClient:
+    """Client for fetching official ESPN injury data"""
+    
+    BASE_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl"
+    CORE_URL = "https://sports.core.api.espn.com/v2/sports/football/leagues/nfl"
+    
+    def __init__(self, days_lookback: int = 7):
+        self.days_lookback = days_lookback
+        self.cutoff_date = datetime.now() - timedelta(days=days_lookback)
+        self.session = requests.Session()
+    
+    def fetch_all_teams(self) -> List[Dict]:
+        """Fetch all NFL teams from ESPN API"""
+        try:
+            url = f"{self.BASE_URL}/teams"
+            response = self.session.get(url, timeout=10)
+            response.raise_for_status()
+            
+            teams_data = response.json()['sports'][0]['leagues'][0]['teams']
+            
+            teams = []
+            for team in teams_data:
+                team_info = team.get('team', {})
+                teams.append({
+                    'id': team_info.get('id'),
+                    'name': team_info.get('displayName'),
+                    'abbreviation': team_info.get('abbreviation'),
+                    'logo': team_info.get('logos', [{}])[0].get('href', '')
+                })
+            
+            return teams
+        except Exception as e:
+            st.error(f"Error fetching teams: {e}")
+            return []
+    
+    def fetch_team_injuries(self, team_id: str, team_name: str) -> List[Dict]:
+        """Fetch injuries for a specific team"""
+        try:
+            url = f"{self.CORE_URL}/teams/{team_id}/injuries?limit=100"
+            response = self.session.get(url, timeout=10)
+            response.raise_for_status()
+            
+            injuries_data = response.json().get('items', [])
+            injuries = []
+            
+            for injury_ref in injuries_data:
+                injury_url = injury_ref.get('$ref', '')
+                if not injury_url:
+                    continue
+                
+                try:
+                    injury_response = self.session.get(injury_url, timeout=10)
+                    injury_response.raise_for_status()
+                    injury_data = injury_response.json()
+                    
+                    # Parse date
+                    date_str = injury_data.get('date', '')
+                    if date_str:
+                        try:
+                            injury_date = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+                            if injury_date < self.cutoff_date:
+                                continue
+                        except ValueError:
+                            pass
+                    
+                    # Extract athlete data
+                    athlete = injury_data.get('athlete', {})
+                    position = athlete.get('position', {}).get('abbreviation', 'N/A')
+                    
+                    # Extract status
+                    status = injury_data.get('status', {})
+                    status_name = status.get('name', 'Unknown') if isinstance(status, dict) else str(status)
+                    
+                    # Skip if Active (not actually injured)
+                    if status_name.lower() == 'active':
+                        continue
+                    
+                    # Extract description
+                    description = injury_data.get('longComment', injury_data.get('shortComment', 'No details available'))
+                    
+                    # Get injury type from details
+                    details = injury_data.get('details', {})
+                    injury_type = details.get('type', 'General')
+                    
+                    injuries.append({
+                        'team': team_name,
+                        'player': athlete.get('displayName', 'Unknown'),
+                        'position': position,
+                        'status': status_name,
+                        'injury_type': injury_type,
+                        'description': description,
+                        'date': injury_date if date_str else datetime.now(),
+                        'source': 'ESPN Official'
+                    })
+                    
+                except Exception as e:
+                    continue
+            
+            return injuries
+            
+        except Exception as e:
+            return []
+    
+    def fetch_all_injuries(self) -> pd.DataFrame:
+        """Fetch all NFL injuries from ESPN API"""
+        teams = self.fetch_all_teams()
+        
+        if not teams:
+            return pd.DataFrame()
+        
+        all_injuries = []
+        
+        # Use ThreadPoolExecutor for parallel fetching
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = {
+                executor.submit(self.fetch_team_injuries, team['id'], team['name']): team 
+                for team in teams
+            }
+            
+            for future in as_completed(futures):
+                team = futures[future]
+                try:
+                    injuries = future.result()
+                    all_injuries.extend(injuries)
+                except Exception as e:
+                    continue
+        
+        if not all_injuries:
+            return pd.DataFrame()
+        
+        df = pd.DataFrame(all_injuries)
+        
+        # Add injury severity classification
+        df['severity'] = df['status'].apply(self._classify_severity)
+        
+        # Add injury info from database
+        df['injury_info'] = df['injury_type'].str.lower().apply(
+            lambda x: INJURY_DB.get(x, {})
+        )
+        
+        df['injury_code'] = df['injury_info'].apply(lambda x: x.get('code', 'INJ'))
+        df['recovery_time'] = df['injury_info'].apply(lambda x: x.get('recovery', 'Variable'))
+        df['medical_desc'] = df['injury_info'].apply(lambda x: x.get('description', ''))
+        
+        # Sort by date (most recent first)
+        df = df.sort_values('date', ascending=False)
+        
+        return df
+    
+    @staticmethod
+    def _classify_severity(status: str) -> str:
+        """Classify injury severity based on status"""
+        status_lower = status.lower()
+        
+        if any(word in status_lower for word in ['out', 'ir', 'season', 'reserve']):
+            return 'CRITICAL'
+        elif 'doubtful' in status_lower:
+            return 'SERIOUS'
+        elif 'questionable' in status_lower:
+            return 'MODERATE'
+        elif 'probable' in status_lower or 'day-to-day' in status_lower:
+            return 'MILD'
+        else:
+            return 'UNKNOWN'
+
+# =============================================================================
+# NEWS FEED UTILITIES (Unchanged)
 # =============================================================================
 
 class TextParser:
-    """Text parsing utilities for extracting information from RSS content"""
+    """Text parsing utilities"""
     
     @staticmethod
     def extract_team(text: str, teams: List[str]) -> str:
@@ -75,44 +240,9 @@ class TextParser:
             if team.upper() in text_upper:
                 return team
         return 'General'
-    
-    @staticmethod
-    def extract_player_name(text: str) -> Optional[str]:
-        """Extract player name using regex patterns"""
-        patterns = [
-            r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)',
-            r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\s*[\(\,]',
-            r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\s+(?:injury|injured|out|questionable)',
-        ]
-        
-        for pattern in patterns:
-            match = re.search(pattern, text)
-            if match:
-                name = match.group(1).strip()
-                if len(name.split()) >= 2:
-                    return name
-        return None
-    
-    @staticmethod
-    def identify_injury_type(text: str, injury_db: Dict) -> Optional[str]:
-        """Identify specific injury type from text"""
-        text_lower = text.lower()
-        
-        # Check priority injuries first
-        priority = ['acl', 'mcl', 'concussion', 'hamstring', 'quadriceps', 'groin']
-        for injury in priority:
-            if injury in text_lower:
-                return injury
-        
-        # Check remaining injuries
-        for injury in injury_db.keys():
-            if injury not in priority and injury in text_lower:
-                return injury
-        
-        return None
 
 class FeedFetcher:
-    """RSS feed fetching and processing"""
+    """RSS feed fetching"""
     
     def __init__(self, days_lookback: int = 7, max_entries: int = 30):
         self.days_lookback = days_lookback
@@ -120,7 +250,7 @@ class FeedFetcher:
         self.cutoff_date = datetime.now() - timedelta(days=days_lookback)
     
     def fetch_single_feed(self, url: str) -> List[Dict]:
-        """Fetch and parse a single RSS feed"""
+        """Fetch single RSS feed"""
         try:
             feed = feedparser.parse(url)
             articles = []
@@ -129,11 +259,9 @@ class FeedFetcher:
                 title = entry.get('title', 'No Title')
                 link = entry.get('link', '')
                 
-                # Parse publication date
                 pub_parsed = entry.get('published_parsed') or entry.get('updated_parsed')
                 pub_date = self._parse_date(pub_parsed)
                 
-                # Only include recent articles
                 if pub_date >= self.cutoff_date:
                     articles.append({
                         'title': title,
@@ -142,13 +270,12 @@ class FeedFetcher:
                     })
             
             return articles
-        except Exception as e:
-            # Silently fail individual feeds to not disrupt entire fetch
+        except Exception:
             return []
     
     @staticmethod
     def _parse_date(pub_parsed) -> datetime:
-        """Parse publication date with fallback"""
+        """Parse publication date"""
         if pub_parsed:
             try:
                 return datetime(*pub_parsed[:6])
@@ -169,16 +296,16 @@ class FeedFetcher:
         return articles
 
 class DataProcessor:
-    """Data processing and cleaning utilities"""
+    """Data processing utilities"""
     
     @staticmethod
     def create_hash(text: str) -> str:
-        """Create MD5 hash for deduplication"""
+        """Create MD5 hash"""
         return hashlib.md5(text.encode()).hexdigest()
     
     @staticmethod
     def deduplicate_dataframe(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
-        """Remove duplicates based on hash of specified columns"""
+        """Remove duplicates"""
         if df.empty:
             return df
         
@@ -190,23 +317,23 @@ class DataProcessor:
     
     @staticmethod
     def filter_by_date(df: pd.DataFrame, hours: int) -> pd.DataFrame:
-        """Filter dataframe by date range"""
+        """Filter by date range"""
         if df.empty:
             return df
         
         cutoff = datetime.now() - timedelta(hours=hours)
-        return df[df['published'] >= cutoff].copy()
+        return df[df['date'] >= cutoff].copy()
     
     @staticmethod
-    def filter_by_team(df: pd.DataFrame, team: str) -> pd.DataFrame:
-        """Filter dataframe by team"""
+    def filter_by_team(df: pd.DataFrame, team: str, team_col: str = 'team') -> pd.DataFrame:
+        """Filter by team"""
         if df.empty or team == 'ALL TEAMS':
             return df.copy()
         
         if team == 'GENERAL':
-            return df[df['team'] == 'General'].copy()
+            return df[df[team_col] == 'General'].copy()
         
-        return df[df['team'] == team].copy()
+        return df[df[team_col] == team].copy()
 
 # =============================================================================
 # DATA FETCHING FUNCTIONS
@@ -214,15 +341,12 @@ class DataProcessor:
 
 @st.cache_data(ttl=APP.get('cache_ttl', 1800), show_spinner=False)
 def fetch_news_data() -> pd.DataFrame:
-    """Fetch and process all news feeds"""
-    fetcher = FeedFetcher(
-        days_lookback=APP.get('days_lookback', 7),
-        max_entries=30
-    )
+    """Fetch news from RSS feeds"""
+    fetcher = FeedFetcher(days_lookback=APP.get('days_lookback', 7), max_entries=30)
     parser = TextParser()
     news_items = []
     
-    # Fetch general news feeds
+    # Fetch general news
     general_feeds = [f['url'] for f in RSS_FEEDS.get('general_news', []) if f.get('enabled', True)]
     articles = fetcher.fetch_multiple_feeds(general_feeds, max_workers=APP.get('max_workers', 10))
     
@@ -232,7 +356,7 @@ def fetch_news_data() -> pd.DataFrame:
             'team': team,
             'headline': article['title'],
             'link': article['link'],
-            'published': article['published']
+            'date': article['published']
         })
     
     # Fetch team-specific feeds
@@ -245,159 +369,67 @@ def fetch_news_data() -> pd.DataFrame:
                 'team': team,
                 'headline': article['title'],
                 'link': article['link'],
-                'published': article['published']
+                'date': article['published']
             })
     
-    # Create and clean dataframe
     if not news_items:
         return pd.DataFrame()
     
     df = pd.DataFrame(news_items)
     df = DataProcessor.deduplicate_dataframe(df, ['headline', 'link'])
-    df = df.sort_values('published', ascending=False)
+    df = df.sort_values('date', ascending=False)
     
     return df
 
 @st.cache_data(ttl=APP.get('cache_ttl', 1800), show_spinner=False)
-def fetch_injury_data() -> pd.DataFrame:
-    """Fetch and process all injury feeds"""
-    fetcher = FeedFetcher(
-        days_lookback=APP.get('days_lookback', 7),
-        max_entries=50
-    )
-    parser = TextParser()
-    injuries = []
-    
-    # Fetch injury-specific feeds
-    injury_feeds = {f['name']: f['url'] for f in RSS_FEEDS.get('injury_feeds', []) if f.get('enabled', True)}
-    
-    for source_name, url in injury_feeds.items():
-        articles = fetcher.fetch_single_feed(url)
-        
-        for article in articles:
-            title = article['title']
-            content = title.lower()
-            
-            # Check if article contains injury keywords
-            has_injury = any(kw in content for kw in INJURY_KEYWORDS)
-            
-            if has_injury:
-                player = parser.extract_player_name(title)
-                team = parser.extract_team(title, TEAMS)
-                injury_type = parser.identify_injury_type(content, INJURY_DB)
-                injury_info = INJURY_DB.get(injury_type, {})
-                
-                injuries.append({
-                    'team': team,
-                    'player': player or 'Unknown',
-                    'headline': title,
-                    'link': article['link'],
-                    'published': article['published'],
-                    'source': source_name,
-                    'injury_type': injury_type,
-                    'injury_code': injury_info.get('code', 'INJ'),
-                    'injury_name': injury_info.get('name', 'INJURY'),
-                    'description': injury_info.get('description', 'Injury details not available'),
-                    'recovery': injury_info.get('recovery', 'Variable'),
-                    'severity': injury_info.get('severity', 'UNKNOWN')
-                })
-    
-    # Create and clean dataframe
-    if not injuries:
-        return pd.DataFrame()
-    
-    df = pd.DataFrame(injuries)
-    df = DataProcessor.deduplicate_dataframe(df, ['headline', 'link'])
-    df = df.sort_values('published', ascending=False)
-    
-    return df
+def fetch_injury_data_espn() -> pd.DataFrame:
+    """Fetch official injury data from ESPN API"""
+    client = ESPNInjuryClient(days_lookback=APP.get('days_lookback', 7))
+    return client.fetch_all_injuries()
 
 # =============================================================================
 # UI COMPONENTS
 # =============================================================================
 
 def apply_custom_css():
-    """Apply custom CSS styling"""
+    """Apply custom CSS"""
     theme = UI.get('theme', {})
     
     st.markdown(f"""
     <style>
-        .main {{
-            background-color: {theme.get('background', '#000000')};
-        }}
-        .news-item {{
-            border-left: 3px solid {theme.get('primary_color', '#00FF00')};
-            padding: 10px;
-            margin-bottom: 15px;
-            background-color: #1A1A1A;
-            font-family: 'Courier New', monospace;
-        }}
-        .injury-item {{
-            border-left: 3px solid {theme.get('secondary_color', '#FF0000')};
-            padding: 10px;
-            margin-bottom: 15px;
-            background-color: #1A1A1A;
-            font-family: 'Courier New', monospace;
-        }}
-        .news-headline {{
-            color: {theme.get('primary_color', '#00FF00')};
-            font-size: 14px;
-            font-weight: bold;
-            text-decoration: none;
-        }}
-        .injury-headline {{
-            color: #FF6666;
-            font-size: 14px;
-            font-weight: bold;
-            text-decoration: none;
-        }}
-        .news-meta, .injury-meta {{
-            color: {theme.get('meta_color', '#888888')};
-            font-size: 11px;
-            margin-top: 5px;
-        }}
-        .injury-details {{
-            background-color: #0D0D0D;
-            padding: 8px;
-            margin-top: 8px;
-            border-left: 2px solid {theme.get('secondary_color', '#FF0000')};
-            font-size: 11px;
-            color: #CCCCCC;
-        }}
-        .severity-critical {{ color: #FF0000; font-weight: bold; }}
-        .severity-serious {{ color: #FF6600; font-weight: bold; }}
-        .severity-moderate {{ color: #FFAA00; font-weight: bold; }}
-        .severity-mild {{ color: #FFFF00; font-weight: bold; }}
-        .ticker {{
-            color: {theme.get('primary_color', '#00FF00')};
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-        }}
-        .stRadio > label, .stSelectbox > label {{
-            color: {theme.get('primary_color', '#00FF00')};
-        }}
+        .main {{background-color: {theme.get('background', '#000000')};}}
+        .news-item {{border-left: 3px solid {theme.get('primary_color', '#00FF00')}; padding: 10px; margin-bottom: 15px; background-color: #1A1A1A; font-family: 'Courier New', monospace;}}
+        .injury-item {{border-left: 3px solid {theme.get('secondary_color', '#FF0000')}; padding: 10px; margin-bottom: 15px; background-color: #1A1A1A; font-family: 'Courier New', monospace;}}
+        .news-headline {{color: {theme.get('primary_color', '#00FF00')}; font-size: 14px; font-weight: bold; text-decoration: none;}}
+        .injury-headline {{color: #FF6666; font-size: 14px; font-weight: bold; text-decoration: none;}}
+        .news-meta, .injury-meta {{color: {theme.get('meta_color', '#888888')}; font-size: 11px; margin-top: 5px;}}
+        .injury-details {{background-color: #0D0D0D; padding: 8px; margin-top: 8px; border-left: 2px solid {theme.get('secondary_color', '#FF0000')}; font-size: 11px; color: #CCCCCC;}}
+        .severity-critical {{color: #FF0000; font-weight: bold;}}
+        .severity-serious {{color: #FF6600; font-weight: bold;}}
+        .severity-moderate {{color: #FFAA00; font-weight: bold;}}
+        .severity-mild {{color: #FFFF00; font-weight: bold;}}
+        .ticker {{color: {theme.get('primary_color', '#00FF00')}; font-family: 'Courier New', monospace; font-size: 12px;}}
+        .stRadio > label, .stSelectbox > label {{color: {theme.get('primary_color', '#00FF00')};}}
     </style>
     """, unsafe_allow_html=True)
 
 def render_header():
-    """Render page header"""
+    """Render header"""
     st.markdown(f"## {APP.get('page_icon', '🏈')} {APP.get('title', 'NFL TERMINAL').upper()}")
     st.markdown(f"<p class='ticker'>SYSTEM TIME: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>", 
                 unsafe_allow_html=True)
 
 def render_sidebar_filters() -> Tuple[str, str, str]:
-    """Render sidebar filters and return selections"""
+    """Render sidebar filters"""
     st.sidebar.markdown("### TERMINAL MODE")
     mode = st.sidebar.radio("SELECT MODE", ["NEWS", "INJURIES"])
     
     st.sidebar.markdown("---")
     st.sidebar.markdown("### FILTERS")
     
-    # Team filter
     team_options = ['ALL TEAMS'] + sorted(TEAMS) + ['GENERAL']
     selected_team = st.sidebar.selectbox('TEAM', team_options)
     
-    # Date filter
     time_ranges = UI.get('time_ranges', ["24H", "3D", "7D"])
     default_range = UI.get('default_time_range', '7D')
     date_filter = st.sidebar.radio("TIME RANGE", time_ranges, 
@@ -428,8 +460,8 @@ def render_stats_bar(df: pd.DataFrame, mode: str, team: str):
             st.markdown(f"<p class='ticker'>FILTER: {team}</p>", unsafe_allow_html=True)
 
 def render_news_item(row: pd.Series):
-    """Render a single news item"""
-    timestamp = row['published'].strftime('%m/%d %H:%M')
+    """Render news item"""
+    timestamp = row['date'].strftime('%m/%d %H:%M')
     st.markdown(f"""
     <div class='news-item'>
         <a href='{row['link']}' target='_blank' class='news-headline'>{row['headline']}</a>
@@ -438,21 +470,25 @@ def render_news_item(row: pd.Series):
     """, unsafe_allow_html=True)
 
 def render_injury_item(row: pd.Series):
-    """Render a single injury item"""
-    timestamp = row['published'].strftime('%m/%d %H:%M')
+    """Render injury item"""
+    timestamp = row['date'].strftime('%m/%d %H:%M')
     severity_class = f"severity-{row['severity'].lower()}"
+    
+    medical_info = f"<strong>MEDICAL INFO:</strong> {row['medical_desc']}<br>" if row['medical_desc'] else ""
     
     st.markdown(f"""
     <div class='injury-item'>
-        <a href='{row['link']}' target='_blank' class='injury-headline'>{row['headline']}</a>
-        <div class='injury-meta'>{timestamp} | {row['player']} | {row['team']} | 
+        <div class='injury-headline'>{row['player']} - {row['injury_type'].upper()}</div>
+        <div class='injury-meta'>{timestamp} | {row['team']} | {row['position']} | 
             <span class='{severity_class}'>[{row['injury_code']}]</span>
         </div>
         <div class='injury-details'>
-            <strong>INJURY:</strong> {row['injury_name']}<br>
+            <strong>STATUS:</strong> <span class='{severity_class}'>{row['status']}</span><br>
             <strong>SEVERITY:</strong> <span class='{severity_class}'>{row['severity']}</span><br>
-            <strong>RECOVERY:</strong> {row['recovery']}<br>
-            <strong>DETAILS:</strong> {row['description']}
+            <strong>RECOVERY:</strong> {row['recovery_time']}<br>
+            {medical_info}
+            <strong>DETAILS:</strong> {row['description']}<br>
+            <strong>SOURCE:</strong> ESPN Official API
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -462,47 +498,47 @@ def render_injury_item(row: pd.Series):
 # =============================================================================
 
 def main():
-    """Main application logic"""
+    """Main application"""
     apply_custom_css()
     render_header()
     
-    # Get sidebar selections
     mode, selected_team, date_filter = render_sidebar_filters()
     
-    # Additional filters for injury mode
-    selected_injury_type = None
+    # Additional filters for injuries
+    selected_status = None
     selected_severity = None
     
     if mode == "INJURIES":
-        injury_type_options = ['ALL INJURIES'] + sorted(list(set([v['name'] for v in INJURY_DB.values()])))
-        selected_injury_type = st.sidebar.selectbox('INJURY TYPE', injury_type_options)
+        st.sidebar.markdown("### INJURY FILTERS")
+        
+        status_options = ['ALL STATUS', 'Out', 'Questionable', 'Doubtful', 'Day-To-Day', 'IR']
+        selected_status = st.sidebar.selectbox('STATUS', status_options)
         
         severity_options = ['ALL', 'CRITICAL', 'SERIOUS', 'MODERATE', 'MILD']
         selected_severity = st.sidebar.selectbox('SEVERITY', severity_options)
     
-    # Fetch data based on mode
-    with st.spinner(f'LOADING {mode} FEED...'):
+    # Fetch data
+    with st.spinner(f'LOADING {mode} DATA...'):
         if mode == "NEWS":
             df = fetch_news_data()
         else:
-            df = fetch_injury_data()
+            df = fetch_injury_data_espn()
     
-    # Check if data was fetched
     if df.empty:
-        st.error(f"{mode} FEED ERROR - RETRY")
+        st.warning(f"No {mode} data available")
         return
     
     # Apply filters
     df_filtered = DataProcessor.filter_by_team(df, selected_team)
     
-    # Apply date filter
+    # Date filter
     date_hours = {'24H': 24, '3D': 72, '7D': 168}
     df_filtered = DataProcessor.filter_by_date(df_filtered, date_hours.get(date_filter, 168))
     
-    # Apply injury-specific filters
+    # Injury-specific filters
     if mode == "INJURIES":
-        if selected_injury_type != 'ALL INJURIES':
-            df_filtered = df_filtered[df_filtered['injury_name'] == selected_injury_type]
+        if selected_status != 'ALL STATUS':
+            df_filtered = df_filtered[df_filtered['status'].str.contains(selected_status, case=False, na=False)]
         
         if selected_severity != 'ALL':
             df_filtered = df_filtered[df_filtered['severity'] == selected_severity]
@@ -524,7 +560,7 @@ def main():
     
     # Refresh button
     st.sidebar.markdown("---")
-    if st.sidebar.button("↻ REFRESH FEED"):
+    if st.sidebar.button("↻ REFRESH DATA"):
         st.cache_data.clear()
         st.rerun()
 
