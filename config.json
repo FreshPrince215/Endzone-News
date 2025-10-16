@@ -8,378 +8,82 @@
     "days_lookback": 7
   },
   "teams": [
-    "Arizona Cardinals",
-    "Atlanta Falcons",
-    "Baltimore Ravens",
-    "Buffalo Bills",
-    "Carolina Panthers",
-    "Chicago Bears",
-    "Cincinnati Bengals",
-    "Cleveland Browns",
-    "Dallas Cowboys",
-    "Denver Broncos",
-    "Detroit Lions",
-    "Green Bay Packers",
-    "Houston Texans",
-    "Indianapolis Colts",
-    "Jacksonville Jaguars",
-    "Kansas City Chiefs",
-    "Las Vegas Raiders",
-    "Los Angeles Chargers",
-    "Los Angeles Rams",
-    "Miami Dolphins",
-    "Minnesota Vikings",
-    "New England Patriots",
-    "New Orleans Saints",
-    "New York Giants",
-    "New York Jets",
-    "Philadelphia Eagles",
-    "Pittsburgh Steelers",
-    "San Francisco 49ers",
-    "Seattle Seahawks",
-    "Tampa Bay Buccaneers",
-    "Tennessee Titans",
-    "Washington Commanders"
+    "Arizona Cardinals", "Atlanta Falcons", "Baltimore Ravens", "Buffalo Bills",
+    "Carolina Panthers", "Chicago Bears", "Cincinnati Bengals", "Cleveland Browns",
+    "Dallas Cowboys", "Denver Broncos", "Detroit Lions", "Green Bay Packers",
+    "Houston Texans", "Indianapolis Colts", "Jacksonville Jaguars", "Kansas City Chiefs",
+    "Las Vegas Raiders", "Los Angeles Chargers", "Los Angeles Rams", "Miami Dolphins",
+    "Minnesota Vikings", "New England Patriots", "New Orleans Saints", "New York Giants",
+    "New York Jets", "Philadelphia Eagles", "Pittsburgh Steelers", "San Francisco 49ers",
+    "Seattle Seahawks", "Tampa Bay Buccaneers", "Tennessee Titans", "Washington Commanders"
   ],
   "rss_feeds": {
     "general_news": [
-      {
-        "name": "NFL Official",
-        "url": "https://www.nfl.com/feeds/rss/home",
-        "enabled": true
-      },
-      {
-        "name": "ESPN",
-        "url": "https://www.espn.com/espn/rss/nfl/news",
-        "enabled": true
-      },
-      {
-        "name": "CBS Sports",
-        "url": "https://www.cbssports.com/rss/headlines/nfl/",
-        "enabled": true
-      }
-    ],
-    "injury_feeds": [
-      {
-        "name": "DraftSharks",
-        "url": "https://www.draftsharks.com/rss/injury-news",
-        "enabled": true,
-        "priority": "high"
-      },
-      {
-        "name": "RotoWire",
-        "url": "https://www.rotowire.com/rss/news.php?sport=NFL",
-        "enabled": true,
-        "priority": "high"
-      },
-      {
-        "name": "ClutchPoints",
-        "url": "https://clutchpoints.com/nfl/feed",
-        "enabled": true,
-        "priority": "medium"
-      },
-      {
-        "name": "ESPN NFL",
-        "url": "https://www.espn.com/espn/rss/nfl/news",
-        "enabled": true,
-        "priority": "medium"
-      },
-      {
-        "name": "CBS Sports",
-        "url": "https://www.cbssports.com/rss/headlines/nfl",
-        "enabled": true,
-        "priority": "low"
-      }
+      {"name": "NFL Official", "url": "https://www.nfl.com/feeds/rss/home", "enabled": true},
+      {"name": "ESPN", "url": "https://www.espn.com/espn/rss/nfl/news", "enabled": true},
+      {"name": "CBS Sports", "url": "https://www.cbssports.com/rss/headlines/nfl/", "enabled": true}
     ],
     "team_feeds": {
-      "Arizona Cardinals": [
-        "https://www.azcardinals.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=ARI"
-      ],
-      "Atlanta Falcons": [
-        "https://www.atlantafalcons.com/rss/article",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=ATL"
-      ],
-      "Baltimore Ravens": [
-        "https://www.baltimoreravens.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=BAL"
-      ],
-      "Buffalo Bills": [
-        "https://www.buffalobills.com/rss/article",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=BUF"
-      ],
-      "Carolina Panthers": [
-        "https://www.panthers.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CAR"
-      ],
-      "Chicago Bears": [
-        "https://www.chicagobears.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CHI"
-      ],
-      "Cincinnati Bengals": [
-        "https://www.bengals.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CIN"
-      ],
-      "Cleveland Browns": [
-        "https://www.clevelandbrowns.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CLE"
-      ],
-      "Dallas Cowboys": [
-        "https://www.dallascowboys.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DAL"
-      ],
-      "Denver Broncos": [
-        "https://www.denverbroncos.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DEN"
-      ],
-      "Detroit Lions": [
-        "https://www.detroitlions.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DET"
-      ],
-      "Green Bay Packers": [
-        "https://www.packers.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=GB"
-      ],
-      "Houston Texans": [
-        "https://www.houstontexans.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=HOU"
-      ],
-      "Indianapolis Colts": [
-        "https://www.colts.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=IND"
-      ],
-      "Jacksonville Jaguars": [
-        "https://www.jaguars.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=JAX"
-      ],
-      "Kansas City Chiefs": [
-        "https://www.chiefs.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=KC"
-      ],
-      "Las Vegas Raiders": [
-        "https://www.raiders.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LV"
-      ],
-      "Los Angeles Chargers": [
-        "https://www.chargers.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LAC"
-      ],
-      "Los Angeles Rams": [
-        "https://www.therams.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LAR"
-      ],
-      "Miami Dolphins": [
-        "https://www.miamidolphins.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=MIA"
-      ],
-      "Minnesota Vikings": [
-        "https://www.vikings.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=MIN"
-      ],
-      "New England Patriots": [
-        "https://www.patriots.com/rss/article",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NE"
-      ],
-      "New Orleans Saints": [
-        "https://www.neworleanssaints.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NO"
-      ],
-      "New York Giants": [
-        "https://www.giants.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NYG"
-      ],
-      "New York Jets": [
-        "https://www.newyorkjets.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NYJ"
-      ],
-      "Philadelphia Eagles": [
-        "https://www.philadelphiaeagles.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=PHI"
-      ],
-      "Pittsburgh Steelers": [
-        "https://www.steelers.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=PIT"
-      ],
-      "San Francisco 49ers": [
-        "https://www.49ers.com/rss/article",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=SF"
-      ],
-      "Seattle Seahawks": [
-        "https://www.seahawks.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=SEA"
-      ],
-      "Tampa Bay Buccaneers": [
-        "https://www.buccaneers.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=TB"
-      ],
-      "Tennessee Titans": [
-        "https://www.tennesseetitans.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=TEN"
-      ],
-      "Washington Commanders": [
-        "https://www.commanders.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=WAS"
-      ]
+      "Arizona Cardinals": ["https://www.azcardinals.com/rss/news"],
+      "Atlanta Falcons": ["https://www.atlantafalcons.com/rss/article"],
+      "Baltimore Ravens": ["https://www.baltimoreravens.com/rss/news"],
+      "Buffalo Bills": ["https://www.buffalobills.com/rss/article"],
+      "Carolina Panthers": ["https://www.panthers.com/rss/news"],
+      "Chicago Bears": ["https://www.chicagobears.com/rss/news"],
+      "Cincinnati Bengals": ["https://www.bengals.com/rss/news"],
+      "Cleveland Browns": ["https://www.clevelandbrowns.com/rss/news"],
+      "Dallas Cowboys": ["https://www.dallascowboys.com/rss/news"],
+      "Denver Broncos": ["https://www.denverbroncos.com/rss/news"],
+      "Detroit Lions": ["https://www.detroitlions.com/rss/news"],
+      "Green Bay Packers": ["https://www.packers.com/rss/news"],
+      "Houston Texans": ["https://www.houstontexans.com/rss/news"],
+      "Indianapolis Colts": ["https://www.colts.com/rss/news"],
+      "Jacksonville Jaguars": ["https://www.jaguars.com/rss/news"],
+      "Kansas City Chiefs": ["https://www.chiefs.com/rss/news"],
+      "Las Vegas Raiders": ["https://www.raiders.com/rss/news"],
+      "Los Angeles Chargers": ["https://www.chargers.com/rss/news"],
+      "Los Angeles Rams": ["https://www.therams.com/rss/news"],
+      "Miami Dolphins": ["https://www.miamidolphins.com/rss/news"],
+      "Minnesota Vikings": ["https://www.vikings.com/rss/news"],
+      "New England Patriots": ["https://www.patriots.com/rss/article"],
+      "New Orleans Saints": ["https://www.neworleanssaints.com/rss/news"],
+      "New York Giants": ["https://www.giants.com/rss/news"],
+      "New York Jets": ["https://www.newyorkjets.com/rss/news"],
+      "Philadelphia Eagles": ["https://www.philadelphiaeagles.com/rss/news"],
+      "Pittsburgh Steelers": ["https://www.steelers.com/rss/news"],
+      "San Francisco 49ers": ["https://www.49ers.com/rss/article"],
+      "Seattle Seahawks": ["https://www.seahawks.com/rss/news"],
+      "Tampa Bay Buccaneers": ["https://www.buccaneers.com/rss/news"],
+      "Tennessee Titans": ["https://www.tennesseetitans.com/rss/news"],
+      "Washington Commanders": ["https://www.commanders.com/rss/news"]
     }
   },
   "injury_database": {
-    "concussion": {
-      "name": "CONCUSSION",
-      "description": "Traumatic brain injury. Requires NFL protocol clearance before return.",
-      "recovery": "1-4 weeks + protocol",
-      "severity": "SERIOUS",
-      "code": "CONC"
-    },
-    "acl": {
-      "name": "ACL TEAR",
-      "description": "Anterior cruciate ligament tear. Usually requires surgery.",
-      "recovery": "6-12 months",
-      "severity": "CRITICAL",
-      "code": "ACL"
-    },
-    "mcl": {
-      "name": "MCL SPRAIN",
-      "description": "Medial collateral ligament injury. Grade dependent severity.",
-      "recovery": "1-8 weeks",
-      "severity": "MODERATE",
-      "code": "MCL"
-    },
-    "hamstring": {
-      "name": "HAMSTRING",
-      "description": "Muscle strain or tear in back of thigh. Common in explosive movements.",
-      "recovery": "2-8 weeks",
-      "severity": "MODERATE",
-      "code": "HAMS"
-    },
-    "ankle": {
-      "name": "ANKLE SPRAIN",
-      "description": "Ligament damage. High ankle sprains take longer to heal.",
-      "recovery": "1-6 weeks",
-      "severity": "MODERATE",
-      "code": "ANK"
-    },
-    "shoulder": {
-      "name": "SHOULDER",
-      "description": "Sprains, separations, dislocations, or rotator cuff damage.",
-      "recovery": "2-12 weeks",
-      "severity": "MODERATE",
-      "code": "SHLDR"
-    },
-    "groin": {
-      "name": "GROIN STRAIN",
-      "description": "Inner thigh muscle strain. Common in lateral movements.",
-      "recovery": "2-6 weeks",
-      "severity": "MODERATE",
-      "code": "GROIN"
-    },
-    "knee": {
-      "name": "KNEE INJURY",
-      "description": "Various knee injuries. Requires specific diagnosis.",
-      "recovery": "1-8 weeks",
-      "severity": "MODERATE",
-      "code": "KNEE"
-    },
-    "foot": {
-      "name": "FOOT INJURY",
-      "description": "Includes plantar fasciitis, turf toe, fractures.",
-      "recovery": "2-8 weeks",
-      "severity": "MODERATE",
-      "code": "FOOT"
-    },
-    "back": {
-      "name": "BACK INJURY",
-      "description": "Muscle strains, herniated discs, or spinal issues.",
-      "recovery": "1-8+ weeks",
-      "severity": "MODERATE",
-      "code": "BACK"
-    },
-    "ribs": {
-      "name": "RIB INJURY",
-      "description": "Bruised or fractured ribs. Painful but often playable.",
-      "recovery": "2-6 weeks",
-      "severity": "MODERATE",
-      "code": "RIBS"
-    },
-    "quadriceps": {
-      "name": "QUAD STRAIN",
-      "description": "Front thigh muscle strain. Ranges from minor to severe.",
-      "recovery": "2-8 weeks",
-      "severity": "MODERATE",
-      "code": "QUAD"
-    },
-    "calf": {
-      "name": "CALF STRAIN",
-      "description": "Lower leg muscle strain. Impacts running ability.",
-      "recovery": "2-6 weeks",
-      "severity": "MODERATE",
-      "code": "CALF"
-    },
-    "hip": {
-      "name": "HIP INJURY",
-      "description": "Strains, labral tears, or joint issues. Affects mobility.",
-      "recovery": "2-12 weeks",
-      "severity": "MODERATE",
-      "code": "HIP"
-    },
-    "neck": {
-      "name": "NECK INJURY",
-      "description": "Cervical spine issues. Treated with extreme caution.",
-      "recovery": "2-8+ weeks",
-      "severity": "SERIOUS",
-      "code": "NECK"
-    },
-    "wrist": {
-      "name": "WRIST",
-      "description": "Bone or ligament injury. Can be braced for some positions.",
-      "recovery": "2-8 weeks",
-      "severity": "MILD",
-      "code": "WRST"
-    },
-    "elbow": {
-      "name": "ELBOW",
-      "description": "Sprains, hyperextensions. Common for QBs and linemen.",
-      "recovery": "2-6 weeks",
-      "severity": "MODERATE",
-      "code": "ELBW"
-    },
-    "finger": {
-      "name": "FINGER",
-      "description": "Sprains, dislocations, fractures. Common for receivers.",
-      "recovery": "1-4 weeks",
-      "severity": "MILD",
-      "code": "FNGR"
-    }
+    "concussion": {"name": "CONCUSSION", "description": "Traumatic brain injury. Requires NFL protocol clearance before return.", "recovery": "1-4 weeks + protocol", "severity": "SERIOUS", "code": "CONC"},
+    "acl": {"name": "ACL TEAR", "description": "Anterior cruciate ligament tear. Usually requires surgery.", "recovery": "6-12 months", "severity": "CRITICAL", "code": "ACL"},
+    "mcl": {"name": "MCL SPRAIN", "description": "Medial collateral ligament injury. Grade dependent severity.", "recovery": "1-8 weeks", "severity": "MODERATE", "code": "MCL"},
+    "hamstring": {"name": "HAMSTRING", "description": "Muscle strain or tear in back of thigh.", "recovery": "2-8 weeks", "severity": "MODERATE", "code": "HAMS"},
+    "ankle": {"name": "ANKLE SPRAIN", "description": "Ligament damage. High ankle sprains take longer.", "recovery": "1-6 weeks", "severity": "MODERATE", "code": "ANK"},
+    "shoulder": {"name": "SHOULDER", "description": "Sprains, separations, dislocations, or rotator cuff damage.", "recovery": "2-12 weeks", "severity": "MODERATE", "code": "SHLDR"},
+    "groin": {"name": "GROIN STRAIN", "description": "Inner thigh muscle strain.", "recovery": "2-6 weeks", "severity": "MODERATE", "code": "GROIN"},
+    "knee": {"name": "KNEE INJURY", "description": "Various knee injuries. Requires specific diagnosis.", "recovery": "1-8 weeks", "severity": "MODERATE", "code": "KNEE"},
+    "foot": {"name": "FOOT INJURY", "description": "Includes plantar fasciitis, turf toe, fractures.", "recovery": "2-8 weeks", "severity": "MODERATE", "code": "FOOT"},
+    "back": {"name": "BACK INJURY", "description": "Muscle strains, herniated discs, or spinal issues.", "recovery": "1-8+ weeks", "severity": "MODERATE", "code": "BACK"},
+    "ribs": {"name": "RIB INJURY", "description": "Bruised or fractured ribs. Painful but often playable.", "recovery": "2-6 weeks", "severity": "MODERATE", "code": "RIBS"},
+    "quadriceps": {"name": "QUAD STRAIN", "description": "Front thigh muscle strain.", "recovery": "2-8 weeks", "severity": "MODERATE", "code": "QUAD"},
+    "calf": {"name": "CALF STRAIN", "description": "Lower leg muscle strain. Impacts running ability.", "recovery": "2-6 weeks", "severity": "MODERATE", "code": "CALF"},
+    "hip": {"name": "HIP INJURY", "description": "Strains, labral tears, or joint issues.", "recovery": "2-12 weeks", "severity": "MODERATE", "code": "HIP"},
+    "neck": {"name": "NECK INJURY", "description": "Cervical spine issues. Treated with extreme caution.", "recovery": "2-8+ weeks", "severity": "SERIOUS", "code": "NECK"},
+    "wrist": {"name": "WRIST", "description": "Bone or ligament injury. Can be braced.", "recovery": "2-8 weeks", "severity": "MILD", "code": "WRST"},
+    "elbow": {"name": "ELBOW", "description": "Sprains, hyperextensions. Common for QBs and linemen.", "recovery": "2-6 weeks", "severity": "MODERATE", "code": "ELBW"},
+    "finger": {"name": "FINGER", "description": "Sprains, dislocations, fractures. Common for receivers.", "recovery": "1-4 weeks", "severity": "MILD", "code": "FNGR"},
+    "chest": {"name": "CHEST INJURY", "description": "Pectoral or chest wall injuries.", "recovery": "2-8 weeks", "severity": "MODERATE", "code": "CHST"},
+    "hand": {"name": "HAND INJURY", "description": "Hand fractures or ligament damage.", "recovery": "2-6 weeks", "severity": "MILD", "code": "HAND"},
+    "thumb": {"name": "THUMB", "description": "Thumb sprains or fractures.", "recovery": "2-6 weeks", "severity": "MILD", "code": "THMB"},
+    "toe": {"name": "TOE INJURY", "description": "Turf toe or toe fractures.", "recovery": "1-4 weeks", "severity": "MILD", "code": "TOE"},
+    "achilles": {"name": "ACHILLES", "description": "Achilles tendon strain or rupture.", "recovery": "6-12 months if rupture", "severity": "CRITICAL", "code": "ACHL"},
+    "general": {"name": "GENERAL INJURY", "description": "Unspecified injury.", "recovery": "Variable", "severity": "UNKNOWN", "code": "INJ"}
   },
-  "injury_keywords": [
-    "concussion",
-    "acl",
-    "mcl",
-    "hamstring",
-    "ankle",
-    "shoulder",
-    "groin",
-    "quadriceps",
-    "calf",
-    "back",
-    "ribs",
-    "wrist",
-    "finger",
-    "hip",
-    "knee",
-    "foot",
-    "neck",
-    "elbow",
-    "injury",
-    "injured",
-    "out",
-    "questionable",
-    "doubtful",
-    "IR",
-    "inactive",
-    "limited",
-    "DNP",
-    "ruled out"
-  ],
   "ui": {
     "theme": {
       "background": "#000000",
@@ -388,11 +92,7 @@
       "text_color": "#FFFFFF",
       "meta_color": "#888888"
     },
-    "time_ranges": [
-      "24H",
-      "3D",
-      "7D"
-    ],
+    "time_ranges": ["24H", "3D", "7D"],
     "default_time_range": "7D",
     "items_per_page": 50
   }
