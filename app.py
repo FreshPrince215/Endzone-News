@@ -75,10 +75,15 @@ class ESPNInjuryClient:
         """Fetch all NFL teams from ESPN API"""
         try:
             url = f"{self.BASE_URL}/teams"
-            response = self.session.get(url, timeout=10)
+            response = self.session.get(url, timeout=15)
             response.raise_for_status()
             
-            teams_data = response.json()['sports'][0]['leagues'][0]['teams']
+            data = response.json()
+            teams_data = data.get('sports', [{}])[0].get('leagues', [{}])[0].get('teams', [])
+            
+            if not teams_data:
+                st.error("No teams data returned from ESPN API")
+                return []
             
             teams = []
             for team in teams_data:
@@ -91,8 +96,14 @@ class ESPNInjuryClient:
                 })
             
             return teams
+        except requests.exceptions.Timeout:
+            st.error("❌ ESPN API timeout - servers may be slow")
+            return []
+        except requests.exceptions.RequestException as e:
+            st.error(f"❌ Network error: {str(e)}")
+            return []
         except Exception as e:
-            st.error(f"Error fetching teams: {e}")
+            st.error(f"❌ Error fetching teams: {str(e)}")
             return []
     
     def fetch_team_injuries(self, team_id: str, team_name: str) -> List[Dict]:
