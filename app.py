@@ -14,8 +14,6 @@ from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import streamlit as st
-import plotly.express as px
-import plotly.graph_objects as go
 
 # =============================================================================
 # CONFIGURATION
