@@ -31,7 +31,15 @@
       {"name": "Westwood One Sports NFL", "url": "https://westwoodonesports.com/category/nfl/feed/", "enabled": true},
       {"name": "Washington Post NFL", "url": "https://feeds.washingtonpost.com/rss/rss_football-insider", "enabled": true},
       {"name": "New York Times NFL", "url": "https://www.nytimes.com/svc/collections/v1/publish/http://www.nytimes.com/topic/organization/national-football-league/rss.xml", "enabled": true},
-      {"name": "Pro Football Mania", "url": "https://profootballmania.com/feed/", "enabled": true}
+      {"name": "Pro Football Mania", "url": "https://profootballmania.com/feed/", "enabled": true},
+      {"name": "Gridiron Experts", "url": "https://gridironexperts.com/feed/", "enabled": true},
+      {"name": "Daily Mail NFL", "url": "https://www.dailymail.co.uk/sport/nfl/index.rss", "enabled": true},
+      {"name": "BBC NFL", "url": "https://feeds.bbci.co.uk/sport/american-football/rss.xml", "enabled": true},
+      {"name": "The Athletic NFL", "url": "https://www.nytimes.com/athletic/rss/nfl/", "enabled": true},
+      {"name": "Athlon Sports NFL Draft", "url": "https://athlonsports.com/.rss/feed/99d9ddce-9758-498f-8961-bd110c2d720f.xml", "enabled": true},
+      {"name": "Boston Herald NFL", "url": "https://www.bostonherald.com/sports/nfl/feed/", "enabled": true},
+      {"name": "ClutchPoints NFL", "url": "https://clutchpoints.com/nfl/feed", "enabled": true},
+      {"name": "NBC Sports NFL", "url": "https://www.nbcsports.com/nfl.atom", "enabled": true}
     ],
     "team_feeds": {
       "Arizona Cardinals": [
@@ -115,7 +123,8 @@
       "Kansas City Chiefs": [
         "https://www.chiefs.com/rss/news",
         "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=KC",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=kc"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=kc",
+        "https://www.chiefscrowd.com/feed/"
       ],
       "Las Vegas Raiders": [
         "https://www.raiders.com/rss/news",
