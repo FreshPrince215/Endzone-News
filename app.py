@@ -1,8 +1,3 @@
-"""
-NFL Terminal - Complete News, Injuries & Stats Platform
-Bloomberg-style terminal for NFL data analysis
-"""
-
 import feedparser
 import pandas as pd
 import re
@@ -14,6 +9,7 @@ from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import streamlit as st
+import plotly.express as px
 
 # =============================================================================
 # CONFIGURATION
@@ -237,27 +233,32 @@ class DataProcessor:
 class NFLVerseStatsClient:
     """Fetch player stats using nflfastR-style data"""
     
-    # Using ESPN's comprehensive stats API
     BASE_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl"
     
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({'User-Agent': 'Mozilla/5.0'})
-        self.current_season = 2025
+        self.current_season = datetime.now().year
     
     def fetch_player_stats(self, stat_type: str = 'passing') -> pd.DataFrame:
         """Fetch player statistics by type"""
         try:
-            # Map stat types to ESPN categories
             category_map = {
-                'passing': 'passing',
-                'rushing': 'rushing',
-                'receiving': 'receiving',
-                'defense': 'defensive'
+                'passing': 'passingYards',
+                'rushing': 'rushingYards',
+                'receiving': 'receivingYards',
+                'defense': 'sacks'
+            }
+            category_display_map = {
+                'passingYards': 'Passing Yards',
+                'rushingYards': 'Rushing Yards',
+                'receivingYards': 'Receiving Yards',
+                'sacks': 'Sacks'
             }
             
-            category = category_map.get(stat_type, 'passing')
-            url = f"{self.BASE_URL}/leaders?league=nfl&season={self.current_season}"
+            category = category_map.get(stat_type, 'passingYards')
+            display_name = category_display_map.get(category, stat_type.capitalize())
+            url = f"{self.BASE_URL}/leaders?category={category}&season={self.current_season}&seasontype=2"
             
             response = self.session.get(url, timeout=15)
             
@@ -265,21 +266,21 @@ class NFLVerseStatsClient:
                 return pd.DataFrame()
             
             data = response.json()
+            leaders = data.get('leaders', [])
             players = []
             
-            for cat in data.get('categories', []):
-                for leader in cat.get('leaders', []):
-                    athlete = leader.get('athlete', {})
-                    team = leader.get('team', {})
-                    
-                    players.append({
-                        'player_name': athlete.get('displayName', 'Unknown'),
-                        'team': team.get('displayName', 'FA'),
-                        'position': athlete.get('position', {}).get('abbreviation', 'N/A'),
-                        'stat_type': cat.get('displayName', 'Unknown'),
-                        'value': float(leader.get('value', 0)),
-                        'rank': int(leader.get('rank', 999))
-                    })
+            for leader in leaders:
+                athlete = leader.get('athlete', {})
+                team = leader.get('team', {})
+                
+                players.append({
+                    'player_name': athlete.get('displayName', 'Unknown'),
+                    'team': team.get('displayName', 'FA'),
+                    'position': athlete.get('position', {}).get('abbreviation', 'N/A'),
+                    'stat_type': display_name,
+                    'value': float(leader.get('value', 0)),
+                    'rank': int(leader.get('rank', 999))
+                })
             
             return pd.DataFrame(players) if players else pd.DataFrame()
             
@@ -288,7 +289,6 @@ class NFLVerseStatsClient:
     
     def search_player(self, player_name: str) -> pd.DataFrame:
         """Search for a specific player's stats"""
-        # Fetch all stats
         all_stats = []
         
         for stat_type in ['passing', 'rushing', 'receiving', 'defense']:
@@ -503,7 +503,7 @@ def render_player_stats_page():
                 # Stats table
                 stats_table = player_data[['stat_type', 'value', 'rank']].copy()
                 stats_table.columns = ['Category', 'Value', 'Rank']
-                stats_table = stats_table.sort_values('Rank')
+                stats_table = stats_table.sort_values('rank')
                 
                 st.dataframe(stats_table, use_container_width=True, hide_index=True)
                 
@@ -554,25 +554,23 @@ def render_leaderboard(stat_type: str):
         st.warning(f"No {stat_type} stats available")
         return
     
-    # Filter to top categories
-    top_categories = df_stats['stat_type'].value_counts().head(5).index.tolist()
+    # Since single category
+    category = df_stats['stat_type'].iloc[0] if not df_stats.empty else stat_type.capitalize()
+    st.markdown(f"#### {category}")
     
-    for category in top_categories:
-        st.markdown(f"#### {category}")
+    cat_data = df_stats.sort_values('rank').head(10)
+    
+    for idx, row in cat_data.iterrows():
+        rank_color = '#FFD700' if row['rank'] <= 3 else '#00FF00'
         
-        cat_data = df_stats[df_stats['stat_type'] == category].sort_values('rank').head(10)
-        
-        for idx, row in cat_data.iterrows():
-            rank_color = '#FFD700' if row['rank'] <= 3 else '#00FF00'
-            
-            st.markdown(f"""
-            <div class='stat-card' style='border-left-color: {rank_color};'>
-                <span style='color: {rank_color}; font-weight: bold;'>#{int(row['rank'])}</span> 
-                <span style='color: #FFFFFF; font-weight: bold;'>{row['player_name']}</span> 
-                <span style='color: #888888;'>| {row['team']} | {row['position']}</span>
-                <span style='color: #00FF00; float: right; font-weight: bold;'>{row['value']:.1f}</span>
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class='stat-card' style='border-left-color: {rank_color};'>
+            <span style='color: {rank_color}; font-weight: bold;'>#{int(row['rank'])}</span> 
+            <span style='color: #FFFFFF; font-weight: bold;'>{row['player_name']}</span> 
+            <span style='color: #888888;'>| {row['team']} | {row['position']}</span>
+            <span style='color: #00FF00; float: right; font-weight: bold;'>{row['value']:.1f}</span>
+        </div>
+        """, unsafe_allow_html=True)
 
 # =============================================================================
 # MAIN APPLICATION
