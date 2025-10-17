@@ -1,6 +1,6 @@
 """
-NFL Terminal - News & Injury Tracker
-Real-time news + Official NFL.com injury scraping
+NFL Terminal - Complete News, Injuries & Stats Platform
+Bloomberg-style terminal for NFL data analysis
 """
 
 import feedparser
@@ -9,12 +9,13 @@ import re
 import json
 import hashlib
 import requests
-from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import streamlit as st
+import plotly.express as px
+import plotly.graph_objects as go
 
 # =============================================================================
 # CONFIGURATION
@@ -26,21 +27,20 @@ def load_config() -> Dict:
     config_path = Path(__file__).parent / 'config.json'
     
     if not config_path.exists():
-        st.error("⚠️ config.json not found")
+        st.error("⚠️ config.json not found. Please add it to the repository.")
         st.stop()
     
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
-        st.error(f"❌ Error loading config: {e}")
+        st.error(f"❌ Error loading config.json: {e}")
         st.stop()
 
 CONFIG = load_config()
 APP = CONFIG.get('app', {})
 TEAMS = CONFIG.get('teams', [])
 RSS_FEEDS = CONFIG.get('rss_feeds', {})
-INJURY_DB = CONFIG.get('injury_database', {})
 UI = CONFIG.get('ui', {})
 
 # =============================================================================
@@ -55,163 +55,75 @@ st.set_page_config(
 )
 
 # =============================================================================
-# NFL.COM INJURY SCRAPER
+# ESPN INJURY CLIENT
 # =============================================================================
 
-class NFLInjuryScraper:
-    """Scrape official injury data from NFL.com"""
+class ESPNInjuryClient:
+    """Fetch real injury data from ESPN API"""
     
-    BASE_URL = "https://www.nfl.com/injuries/league"
+    BASE_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl"
     
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        })
+        self.session.headers.update({'User-Agent': 'Mozilla/5.0'})
     
-    def get_current_week(self) -> int:
-        """Determine current NFL week"""
-        # NFL season starts first Thursday in September
-        # Approximate current week based on date
-        now = datetime.now()
-        
-        # 2025 season started Sep 4
-        season_start = datetime(2025, 9, 4)
-        
-        if now < season_start:
-            return 1
-        
-        days_since_start = (now - season_start).days
-        current_week = (days_since_start // 7) + 1
-        
-        return min(current_week, 18)  # Max 18 weeks in regular season
-    
-    def scrape_week(self, year: int, week: int) -> List[Dict]:
-        """Scrape injuries for a specific week"""
-        url = f"{self.BASE_URL}/{year}/REG{week}"
-        injuries = []
-        
+    def fetch_all_injuries(self) -> pd.DataFrame:
+        """Fetch all current NFL injuries"""
         try:
-            response = self.session.get(url, timeout=10)
-            response.raise_for_status()
+            url = f"{self.BASE_URL}/injuries"
+            response = self.session.get(url, timeout=15)
             
-            soup = BeautifulSoup(response.text, 'html.parser')
-            tables = soup.findAll("table")
+            if response.status_code != 200:
+                return pd.DataFrame()
             
-            for table in tables:
-                # Only process top-level tables
-                if table.findParent("table") is None:
-                    for tr in table.find_all('tr'):
-                        td = tr.find_all('td')
-                        rows = [cell.text.strip() for cell in td if cell and len(cell.text.strip()) > 0]
-                        
-                        if len(rows) >= 4:  # Need at least team, player, position, status
-                            injuries.append({
-                                'team': rows[0] if len(rows) > 0 else 'Unknown',
-                                'player': rows[1] if len(rows) > 1 else 'Unknown',
-                                'position': rows[2] if len(rows) > 2 else 'N/A',
-                                'status': rows[3] if len(rows) > 3 else 'Unknown',
-                                'description': rows[4] if len(rows) > 4 else 'No details',
-                                'week': week,
-                                'year': year,
-                                'source': 'NFL.com Official'
-                            })
+            data = response.json()
+            injuries = []
             
-            return injuries
+            for team_data in data.get('items', []):
+                team_name = team_data.get('team', {}).get('displayName', 'Unknown')
+                
+                for player_data in team_data.get('injuries', []):
+                    athlete = player_data.get('athlete', {})
+                    
+                    # Only include if there's actually an injury status
+                    status = player_data.get('status', '')
+                    if not status or status.lower() == 'active':
+                        continue
+                    
+                    injuries.append({
+                        'team': team_name,
+                        'player': athlete.get('displayName', 'Unknown'),
+                        'position': athlete.get('position', {}).get('abbreviation', 'N/A'),
+                        'status': status,
+                        'description': player_data.get('longComment', player_data.get('shortComment', 'No details available')),
+                        'date': datetime.now(),
+                        'source': 'ESPN Official'
+                    })
             
-        except requests.RequestException as e:
-            return []
-        except Exception as e:
-            return []
-    
-    def scrape_current_season(self, weeks_back: int = 3) -> pd.DataFrame:
-        """Scrape injuries from current season (last N weeks)"""
-        current_year = 2025
-        current_week = self.get_current_week()
-        
-        # Get last N weeks
-        weeks_to_scrape = list(range(max(1, current_week - weeks_back + 1), current_week + 1))
-        
-        all_injuries = []
-        
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        
-        for idx, week in enumerate(weeks_to_scrape):
-            status_text.text(f"Scraping Week {week}...")
-            progress_bar.progress((idx + 1) / len(weeks_to_scrape))
+            if not injuries:
+                return pd.DataFrame()
             
-            injuries = self.scrape_week(current_year, week)
-            all_injuries.extend(injuries)
-        
-        progress_bar.empty()
-        status_text.empty()
-        
-        if not all_injuries:
-            return pd.DataFrame()
-        
-        df = pd.DataFrame(all_injuries)
-        
-        # Filter for relevant statuses
-        relevant_statuses = ['Out', 'Questionable', 'Doubtful', 'IR']
-        df = df[df['status'].isin(relevant_statuses)]
-        
-        # Add date (approximate - use current date for latest week)
-        df['date'] = df['week'].apply(
-            lambda w: datetime.now() - timedelta(days=(current_week - w) * 7)
-        )
-        
-        return df
-    
-    def identify_injury_type(self, description: str) -> str:
-        """Identify injury type from description"""
-        desc_lower = description.lower()
-        
-        priority = ['concussion', 'acl', 'mcl', 'hamstring', 'ankle', 'knee', 'shoulder']
-        for injury in priority:
-            if injury in desc_lower:
-                return injury
-        
-        for injury in INJURY_DB.keys():
-            if injury in desc_lower:
-                return injury
-        
-        return 'general'
-    
-    def enhance_injury_data(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Add enhanced injury information"""
-        if df.empty:
+            df = pd.DataFrame(injuries)
+            
+            # Classify severity
+            df['severity'] = df['status'].apply(self._classify_severity)
+            
+            # Remove duplicates
+            df = df.drop_duplicates(subset=['player', 'team'])
+            df = df.sort_values('date', ascending=False)
+            
             return df
-        
-        # Identify injury types
-        df['injury_type'] = df['description'].apply(self.identify_injury_type)
-        
-        # Add severity classification
-        df['severity'] = df['status'].apply(self.classify_severity)
-        
-        # Add injury database info
-        df['injury_info'] = df['injury_type'].apply(
-            lambda x: INJURY_DB.get(x, INJURY_DB.get('general', {}))
-        )
-        
-        df['injury_code'] = df['injury_info'].apply(lambda x: x.get('code', 'INJ'))
-        df['recovery_time'] = df['injury_info'].apply(lambda x: x.get('recovery', 'Variable'))
-        df['medical_desc'] = df['injury_info'].apply(lambda x: x.get('description', ''))
-        
-        # Remove duplicates (same player, same injury)
-        df = df.drop_duplicates(subset=['player', 'team', 'injury_type'], keep='last')
-        
-        # Sort by week (most recent first)
-        df = df.sort_values('week', ascending=False)
-        
-        return df
+            
+        except Exception as e:
+            st.error(f"Error fetching injuries: {e}")
+            return pd.DataFrame()
     
     @staticmethod
-    def classify_severity(status: str) -> str:
-        """Classify injury severity based on status"""
+    def _classify_severity(status: str) -> str:
+        """Classify injury severity"""
         status_lower = status.lower()
         
-        if 'out' in status_lower or 'ir' in status_lower:
+        if any(word in status_lower for word in ['out', 'ir', 'reserve']):
             return 'CRITICAL'
         elif 'doubtful' in status_lower:
             return 'SERIOUS'
@@ -221,82 +133,182 @@ class NFLInjuryScraper:
             return 'MILD'
 
 # =============================================================================
-# NEWS UTILITIES
+# NEWS FEED UTILITIES
 # =============================================================================
 
-class TextParser:
-    @staticmethod
-    def extract_team(text: str, teams: List[str]) -> str:
-        text_upper = text.upper()
-        for team in teams:
-            if team.upper() in text_upper:
-                return team
-        return 'General'
-
 class FeedFetcher:
+    """RSS feed fetching and processing"""
+    
     def __init__(self, days_lookback: int = 7, max_entries: int = 30):
         self.days_lookback = days_lookback
         self.max_entries = max_entries
         self.cutoff_date = datetime.now() - timedelta(days=days_lookback)
     
     def fetch_single_feed(self, url: str) -> List[Dict]:
+        """Fetch a single RSS feed"""
         try:
             feed = feedparser.parse(url)
             articles = []
             
             for entry in feed.entries[:self.max_entries]:
+                title = entry.get('title', '')
+                link = entry.get('link', '')
+                
                 pub_parsed = entry.get('published_parsed') or entry.get('updated_parsed')
                 pub_date = datetime(*pub_parsed[:6]) if pub_parsed else datetime.now()
                 
                 if pub_date >= self.cutoff_date:
                     articles.append({
-                        'title': entry.get('title', ''),
-                        'link': entry.get('link', ''),
+                        'title': title,
+                        'link': link,
                         'published': pub_date
                     })
+            
             return articles
         except:
             return []
     
     def fetch_multiple_feeds(self, feeds: List[str], max_workers: int = 10) -> List[Dict]:
+        """Fetch multiple feeds in parallel"""
         articles = []
+        
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {executor.submit(self.fetch_single_feed, url): url for url in feeds}
+            
             for future in as_completed(futures):
                 articles.extend(future.result())
+        
         return articles
 
+class TextParser:
+    """Text parsing utilities"""
+    
+    @staticmethod
+    def extract_team(text: str, teams: List[str]) -> str:
+        """Extract team name from text"""
+        text_upper = text.upper()
+        for team in teams:
+            if team.upper() in text_upper:
+                return team
+        return 'General'
+
 class DataProcessor:
+    """Data processing utilities"""
+    
     @staticmethod
     def create_hash(text: str) -> str:
+        """Create MD5 hash for deduplication"""
         return hashlib.md5(text.encode()).hexdigest()
     
     @staticmethod
     def deduplicate_dataframe(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+        """Remove duplicates"""
         if df.empty:
             return df
+        
         hash_text = df[columns].astype(str).agg(''.join, axis=1)
         df['hash'] = hash_text.apply(DataProcessor.create_hash)
         df = df.drop_duplicates(subset=['hash']).drop(columns=['hash'])
+        
         return df
     
     @staticmethod
     def filter_by_date(df: pd.DataFrame, hours: int) -> pd.DataFrame:
+        """Filter by date range"""
         if df.empty:
             return df
+        
         cutoff = datetime.now() - timedelta(hours=hours)
         return df[df['date'] >= cutoff].copy()
     
     @staticmethod
     def filter_by_team(df: pd.DataFrame, team: str, team_col: str = 'team') -> pd.DataFrame:
+        """Filter by team"""
         if df.empty or team == 'ALL TEAMS':
             return df.copy()
+        
         if team == 'GENERAL':
             return df[df[team_col] == 'General'].copy()
+        
         return df[df[team_col] == team].copy()
 
 # =============================================================================
-# DATA FETCHING
+# NFLVERSE STATS CLIENT
+# =============================================================================
+
+class NFLVerseStatsClient:
+    """Fetch player stats using nflfastR-style data"""
+    
+    # Using ESPN's comprehensive stats API
+    BASE_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl"
+    
+    def __init__(self):
+        self.session = requests.Session()
+        self.session.headers.update({'User-Agent': 'Mozilla/5.0'})
+        self.current_season = 2025
+    
+    def fetch_player_stats(self, stat_type: str = 'passing') -> pd.DataFrame:
+        """Fetch player statistics by type"""
+        try:
+            # Map stat types to ESPN categories
+            category_map = {
+                'passing': 'passing',
+                'rushing': 'rushing',
+                'receiving': 'receiving',
+                'defense': 'defensive'
+            }
+            
+            category = category_map.get(stat_type, 'passing')
+            url = f"{self.BASE_URL}/leaders?league=nfl&season={self.current_season}"
+            
+            response = self.session.get(url, timeout=15)
+            
+            if response.status_code != 200:
+                return pd.DataFrame()
+            
+            data = response.json()
+            players = []
+            
+            for cat in data.get('categories', []):
+                for leader in cat.get('leaders', []):
+                    athlete = leader.get('athlete', {})
+                    team = leader.get('team', {})
+                    
+                    players.append({
+                        'player_name': athlete.get('displayName', 'Unknown'),
+                        'team': team.get('displayName', 'FA'),
+                        'position': athlete.get('position', {}).get('abbreviation', 'N/A'),
+                        'stat_type': cat.get('displayName', 'Unknown'),
+                        'value': float(leader.get('value', 0)),
+                        'rank': int(leader.get('rank', 999))
+                    })
+            
+            return pd.DataFrame(players) if players else pd.DataFrame()
+            
+        except Exception as e:
+            return pd.DataFrame()
+    
+    def search_player(self, player_name: str) -> pd.DataFrame:
+        """Search for a specific player's stats"""
+        # Fetch all stats
+        all_stats = []
+        
+        for stat_type in ['passing', 'rushing', 'receiving', 'defense']:
+            df = self.fetch_player_stats(stat_type)
+            if not df.empty:
+                all_stats.append(df)
+        
+        if not all_stats:
+            return pd.DataFrame()
+        
+        df_all = pd.concat(all_stats, ignore_index=True)
+        
+        # Filter by player name (case-insensitive partial match)
+        mask = df_all['player_name'].str.contains(player_name, case=False, na=False)
+        return df_all[mask]
+
+# =============================================================================
+# DATA FETCHING FUNCTIONS
 # =============================================================================
 
 @st.cache_data(ttl=APP.get('cache_ttl', 1800), show_spinner=False)
@@ -306,8 +318,9 @@ def fetch_news_data() -> pd.DataFrame:
     parser = TextParser()
     news_items = []
     
+    # Fetch general news
     general_feeds = [f['url'] for f in RSS_FEEDS.get('general_news', []) if f.get('enabled', True)]
-    articles = fetcher.fetch_multiple_feeds(general_feeds)
+    articles = fetcher.fetch_multiple_feeds(general_feeds, max_workers=APP.get('max_workers', 10))
     
     for article in articles:
         team = parser.extract_team(article['title'], TEAMS)
@@ -318,9 +331,11 @@ def fetch_news_data() -> pd.DataFrame:
             'date': article['published']
         })
     
+    # Fetch team-specific feeds
     team_feeds_dict = RSS_FEEDS.get('team_feeds', {})
     for team, feed_urls in team_feeds_dict.items():
-        articles = fetcher.fetch_multiple_feeds(feed_urls)
+        articles = fetcher.fetch_multiple_feeds(feed_urls, max_workers=APP.get('max_workers', 10))
+        
         for article in articles:
             news_items.append({
                 'team': team,
@@ -335,41 +350,33 @@ def fetch_news_data() -> pd.DataFrame:
     df = pd.DataFrame(news_items)
     df = DataProcessor.deduplicate_dataframe(df, ['headline', 'link'])
     df = df.sort_values('date', ascending=False)
+    
     return df
 
 @st.cache_data(ttl=APP.get('cache_ttl', 1800), show_spinner=False)
 def fetch_injury_data() -> pd.DataFrame:
-    """Fetch injury data from NFL.com"""
-    st.info("🔄 Scraping official NFL.com injury data...")
-    
-    scraper = NFLInjuryScraper()
-    df = scraper.scrape_current_season(weeks_back=3)
-    
-    if df.empty:
-        st.warning("⚠️ No injuries found on NFL.com")
-        return pd.DataFrame()
-    
-    st.success(f"✅ Found {len(df)} injuries from NFL.com")
-    
-    # Enhance with injury database info
-    df = scraper.enhance_injury_data(df)
-    
-    return df
+    """Fetch injury data from ESPN"""
+    client = ESPNInjuryClient()
+    return client.fetch_all_injuries()
 
 # =============================================================================
 # UI COMPONENTS
 # =============================================================================
 
 def apply_custom_css():
+    """Apply custom CSS styling"""
     theme = UI.get('theme', {})
+    
     st.markdown(f"""
     <style>
         .main {{background-color: {theme.get('background', '#000000')};}}
         .news-item {{border-left: 3px solid {theme.get('primary_color', '#00FF00')}; padding: 10px; margin-bottom: 15px; background-color: #1A1A1A; font-family: 'Courier New', monospace;}}
         .injury-item {{border-left: 3px solid {theme.get('secondary_color', '#FF0000')}; padding: 10px; margin-bottom: 15px; background-color: #1A1A1A; font-family: 'Courier New', monospace;}}
+        .stat-card {{border-left: 3px solid #FFD700; padding: 10px; margin-bottom: 15px; background-color: #1A1A1A; font-family: 'Courier New', monospace;}}
         .news-headline {{color: {theme.get('primary_color', '#00FF00')}; font-size: 14px; font-weight: bold;}}
         .injury-headline {{color: #FF6666; font-size: 14px; font-weight: bold;}}
-        .news-meta, .injury-meta {{color: {theme.get('meta_color', '#888888')}; font-size: 11px; margin-top: 5px;}}
+        .stat-headline {{color: #FFD700; font-size: 14px; font-weight: bold;}}
+        .news-meta, .injury-meta, .stat-meta {{color: {theme.get('meta_color', '#888888')}; font-size: 11px; margin-top: 5px;}}
         .injury-details {{background-color: #0D0D0D; padding: 8px; margin-top: 8px; border-left: 2px solid {theme.get('secondary_color', '#FF0000')}; font-size: 11px; color: #CCCCCC;}}
         .severity-critical {{color: #FF0000; font-weight: bold;}}
         .severity-serious {{color: #FF6600; font-weight: bold;}}
@@ -377,14 +384,18 @@ def apply_custom_css():
         .severity-mild {{color: #FFFF00; font-weight: bold;}}
         .ticker {{color: {theme.get('primary_color', '#00FF00')}; font-family: 'Courier New', monospace; font-size: 12px;}}
         .stRadio > label, .stSelectbox > label {{color: {theme.get('primary_color', '#00FF00')};}}
+        .search-box {{background-color: #1A1A1A; border: 1px solid #00FF00; color: #00FF00; font-family: 'Courier New', monospace;}}
     </style>
     """, unsafe_allow_html=True)
 
 def render_header():
+    """Render page header"""
     st.markdown(f"## {APP.get('page_icon', '🏈')} {APP.get('title', 'NFL TERMINAL').upper()}")
-    st.markdown(f"<p class='ticker'>SYSTEM TIME: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p class='ticker'>SYSTEM TIME: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>", 
+                unsafe_allow_html=True)
 
 def render_sidebar_filters() -> Tuple[str, str, str]:
+    """Render sidebar filters"""
     st.sidebar.markdown("### TERMINAL MODE")
     mode = st.sidebar.radio("SELECT MODE", ["NEWS", "INJURIES", "PLAYER STATS"])
     
@@ -395,11 +406,14 @@ def render_sidebar_filters() -> Tuple[str, str, str]:
     selected_team = st.sidebar.selectbox('TEAM', team_options)
     
     time_ranges = UI.get('time_ranges', ["24H", "3D", "7D"])
-    date_filter = st.sidebar.radio("TIME RANGE", time_ranges, index=2)
+    default_range = UI.get('default_time_range', '7D')
+    date_filter = st.sidebar.radio("TIME RANGE", time_ranges, 
+                                   index=time_ranges.index(default_range) if default_range in time_ranges else 0)
     
     return mode, selected_team, date_filter
 
 def render_stats_bar(df: pd.DataFrame, mode: str, team: str):
+    """Render statistics bar"""
     if mode == "NEWS":
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -421,6 +435,7 @@ def render_stats_bar(df: pd.DataFrame, mode: str, team: str):
             st.markdown(f"<p class='ticker'>FILTER: {team}</p>", unsafe_allow_html=True)
 
 def render_news_item(row: pd.Series):
+    """Render a news item"""
     timestamp = row['date'].strftime('%m/%d %H:%M')
     st.markdown(f"""
     <div class='news-item'>
@@ -430,19 +445,17 @@ def render_news_item(row: pd.Series):
     """, unsafe_allow_html=True)
 
 def render_injury_item(row: pd.Series):
-    week_display = f"Week {row['week']}"
+    """Render an injury item"""
+    timestamp = row['date'].strftime('%m/%d %H:%M')
     severity_class = f"severity-{row['severity'].lower()}"
-    medical_info = f"<strong>MEDICAL:</strong> {row['medical_desc']}<br>" if row['medical_desc'] else ""
     
     st.markdown(f"""
     <div class='injury-item'>
-        <div class='injury-headline'>{row['player']} - {row['injury_type'].upper()}</div>
-        <div class='injury-meta'>{week_display} | {row['team']} | {row['position']} | <span class='{severity_class}'>[{row['injury_code']}]</span></div>
+        <div class='injury-headline'>{row['player']}</div>
+        <div class='injury-meta'>{timestamp} | {row['team']} | {row['position']} | <span class='{severity_class}'>[{row['status']}]</span></div>
         <div class='injury-details'>
             <strong>STATUS:</strong> <span class='{severity_class}'>{row['status']}</span><br>
             <strong>SEVERITY:</strong> <span class='{severity_class}'>{row['severity']}</span><br>
-            <strong>RECOVERY:</strong> {row['recovery_time']}<br>
-            {medical_info}
             <strong>DETAILS:</strong> {row['description']}<br>
             <strong>SOURCE:</strong> {row['source']}
         </div>
@@ -450,269 +463,125 @@ def render_injury_item(row: pd.Series):
     """, unsafe_allow_html=True)
 
 # =============================================================================
-# PLAYER STATS MODULE
+# PLAYER STATS PAGE (StatMuse-style)
 # =============================================================================
 
-class PlayerStatsClient:
-    """Fetch and analyze player statistics"""
-    
-    ESPN_API = "https://site.api.espn.com/apis/site/v2/sports/football/nfl"
-    
-    def __init__(self):
-        self.session = requests.Session()
-        self.session.headers.update({'User-Agent': 'Mozilla/5.0'})
-    
-    def fetch_player_stats(self, season: int = 2025) -> pd.DataFrame:
-        """Fetch player stats for current season"""
-        try:
-            url = f"{self.ESPN_API}/leaders"
-            response = self.session.get(url, timeout=10)
-            
-            if response.status_code != 200:
-                return pd.DataFrame()
-            
-            data = response.json()
-            players = []
-            
-            # Extract player data from leaders
-            for category in data.get('categories', []):
-                cat_name = category.get('displayName', '')
-                
-                for leader in category.get('leaders', []):
-                    athlete = leader.get('athlete', {})
-                    team = leader.get('team', {})
-                    
-                    players.append({
-                        'player_name': athlete.get('displayName', 'Unknown'),
-                        'team': team.get('displayName', 'Unknown'),
-                        'position': athlete.get('position', {}).get('abbreviation', 'N/A'),
-                        'category': cat_name,
-                        'value': leader.get('value', 0),
-                        'rank': leader.get('rank', 999)
-                    })
-            
-            return pd.DataFrame(players) if players else pd.DataFrame()
-            
-        except Exception:
-            return pd.DataFrame()
-    
-    def fetch_team_roster(self, team_id: str) -> pd.DataFrame:
-        """Fetch team roster"""
-        try:
-            url = f"{self.ESPN_API}/teams/{team_id}/roster"
-            response = self.session.get(url, timeout=10)
-            
-            if response.status_code != 200:
-                return pd.DataFrame()
-            
-            data = response.json()
-            roster = []
-            
-            for athlete in data.get('athletes', []):
-                roster.append({
-                    'player_name': athlete.get('displayName', 'Unknown'),
-                    'position': athlete.get('position', {}).get('abbreviation', 'N/A'),
-                    'jersey': athlete.get('jersey', 'N/A'),
-                    'age': athlete.get('age', 'N/A'),
-                    'height': athlete.get('height', 'N/A'),
-                    'weight': athlete.get('weight', 'N/A')
-                })
-            
-            return pd.DataFrame(roster) if roster else pd.DataFrame()
-            
-        except Exception:
-            return pd.DataFrame()
-
 def render_player_stats_page():
-    """Render player stats and comparison page"""
-    st.markdown("### 📊 PLAYER STATISTICS & ANALYSIS")
+    """Render StatMuse-style player stats interface"""
+    st.markdown("### 🎯 PLAYER STATISTICS - ASK ANYTHING")
     
-    tab1, tab2, tab3 = st.tabs(["🏆 LEADERBOARDS", "⚖️ PLAYER COMPARISON", "📈 TEAM ROSTER"])
-    
-    with tab1:
-        render_leaderboards()
-    
-    with tab2:
-        render_player_comparison()
-    
-    with tab3:
-        render_team_roster()
-
-def render_leaderboards():
-    """Render statistical leaderboards"""
-    st.markdown("#### Season Leaders")
-    
-    client = PlayerStatsClient()
-    
-    with st.spinner("Fetching player stats..."):
-        df_stats = client.fetch_player_stats()
-    
-    if df_stats.empty:
-        st.warning("No player stats available")
-        return
-    
-    # Category selector
-    categories = df_stats['category'].unique().tolist()
-    selected_category = st.selectbox("Select Category", categories)
-    
-    # Filter by category
-    df_filtered = df_stats[df_stats['category'] == selected_category].copy()
-    df_filtered = df_filtered.sort_values('rank')
-    
-    # Display leaderboard
-    st.markdown(f"##### {selected_category}")
-    
-    for idx, row in df_filtered.head(20).iterrows():
-        rank_color = '#FFD700' if row['rank'] <= 3 else '#00FF00'
-        
-        st.markdown(f"""
-        <div style='background-color: #1A1A1A; padding: 10px; margin: 5px 0; border-left: 3px solid {rank_color}; font-family: "Courier New", monospace;'>
-            <span style='color: {rank_color}; font-weight: bold;'>#{row['rank']}</span> 
-            <span style='color: #FFFFFF;'>{row['player_name']}</span> 
-            <span style='color: #888888;'>| {row['team']} | {row['position']}</span>
-            <span style='color: #00FF00; float: right; font-weight: bold;'>{row['value']}</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-def render_player_comparison():
-    """Render player comparison tool"""
-    st.markdown("#### Compare Players")
-    
-    client = PlayerStatsClient()
-    
-    with st.spinner("Loading player data..."):
-        df_stats = client.fetch_player_stats()
-    
-    if df_stats.empty:
-        st.warning("No player data available")
-        return
-    
-    # Get unique players
-    players = sorted(df_stats['player_name'].unique().tolist())
-    
-    col1, col2 = st.columns(2)
+    # Search interface
+    col1, col2 = st.columns([3, 1])
     
     with col1:
-        player1 = st.selectbox("Player 1", players, key='p1')
+        query = st.text_input(
+            "Search Player Stats",
+            placeholder="e.g., Patrick Mahomes, Lamar Jackson, Christian McCaffrey",
+            key="player_search"
+        )
     
     with col2:
-        player2 = st.selectbox("Player 2", players, key='p2')
+        search_button = st.button("🔍 SEARCH", type="primary", use_container_width=True)
     
-    if st.button("COMPARE PLAYERS", type="primary"):
-        # Get stats for both players
-        p1_stats = df_stats[df_stats['player_name'] == player1]
-        p2_stats = df_stats[df_stats['player_name'] == player2]
+    if search_button and query:
+        with st.spinner(f"Searching for {query}..."):
+            client = NFLVerseStatsClient()
+            df_results = client.search_player(query)
         
-        if p1_stats.empty or p2_stats.empty:
-            st.warning("Stats not available for selected players")
+        if df_results.empty:
+            st.warning(f"No stats found for '{query}'")
             return
         
-        # Display comparison
-        col1, col2 = st.columns(2)
+        # Display results
+        st.success(f"Found stats for {df_results['player_name'].nunique()} player(s)")
         
-        with col1:
-            st.markdown(f"##### {player1}")
-            p1_team = p1_stats.iloc[0]['team']
-            p1_pos = p1_stats.iloc[0]['position']
-            st.markdown(f"**Team:** {p1_team}")
-            st.markdown(f"**Position:** {p1_pos}")
-            st.markdown("---")
+        # Group by player
+        for player in df_results['player_name'].unique():
+            player_data = df_results[df_results['player_name'] == player]
+            team = player_data.iloc[0]['team']
+            position = player_data.iloc[0]['position']
             
-            for _, row in p1_stats.iterrows():
-                st.markdown(f"**{row['category']}:** {row['value']} (Rank: #{row['rank']})")
-        
-        with col2:
-            st.markdown(f"##### {player2}")
-            p2_team = p2_stats.iloc[0]['team']
-            p2_pos = p2_stats.iloc[0]['position']
-            st.markdown(f"**Team:** {p2_team}")
-            st.markdown(f"**Position:** {p2_pos}")
-            st.markdown("---")
-            
-            for _, row in p2_stats.iterrows():
-                st.markdown(f"**{row['category']}:** {row['value']} (Rank: #{row['rank']})")
-        
-        # Side-by-side comparison table
-        st.markdown("---")
-        st.markdown("##### Statistical Comparison")
-        
-        # Merge stats
-        comparison = []
-        for cat in p1_stats['category'].unique():
-            p1_val = p1_stats[p1_stats['category'] == cat]['value'].values[0] if not p1_stats[p1_stats['category'] == cat].empty else 0
-            p2_val = p2_stats[p2_stats['category'] == cat]['value'].values[0] if not p2_stats[p2_stats['category'] == cat].empty else 0
-            
-            comparison.append({
-                'Category': cat,
-                player1: p1_val,
-                player2: p2_val,
-                'Advantage': player1 if p1_val > p2_val else (player2 if p2_val > p1_val else 'Tie')
-            })
-        
-        df_comparison = pd.DataFrame(comparison)
-        st.dataframe(df_comparison, use_container_width=True)
-
-def render_team_roster():
-    """Render team roster viewer"""
-    st.markdown("#### Team Roster")
-    
-    # Team selector (using ESPN team IDs)
-    team_mapping = {
-        'Arizona Cardinals': '22', 'Atlanta Falcons': '1', 'Baltimore Ravens': '33',
-        'Buffalo Bills': '2', 'Carolina Panthers': '29', 'Chicago Bears': '3',
-        'Cincinnati Bengals': '4', 'Cleveland Browns': '5', 'Dallas Cowboys': '6',
-        'Denver Broncos': '7', 'Detroit Lions': '8', 'Green Bay Packers': '9',
-        'Houston Texans': '34', 'Indianapolis Colts': '11', 'Jacksonville Jaguars': '30',
-        'Kansas City Chiefs': '12', 'Las Vegas Raiders': '13', 'Los Angeles Chargers': '24',
-        'Los Angeles Rams': '14', 'Miami Dolphins': '15', 'Minnesota Vikings': '16',
-        'New England Patriots': '17', 'New Orleans Saints': '18', 'New York Giants': '19',
-        'New York Jets': '20', 'Philadelphia Eagles': '21', 'Pittsburgh Steelers': '23',
-        'San Francisco 49ers': '25', 'Seattle Seahawks': '26', 'Tampa Bay Buccaneers': '27',
-        'Tennessee Titans': '10', 'Washington Commanders': '28'
-    }
-    
-    selected_team_name = st.selectbox("Select Team", sorted(team_mapping.keys()))
-    team_id = team_mapping[selected_team_name]
-    
-    if st.button("LOAD ROSTER", type="primary"):
-        client = PlayerStatsClient()
-        
-        with st.spinner(f"Loading {selected_team_name} roster..."):
-            df_roster = client.fetch_team_roster(team_id)
-        
-        if df_roster.empty:
-            st.warning("Roster data not available")
-            return
-        
-        # Position filter
-        positions = ['ALL'] + sorted(df_roster['position'].unique().tolist())
-        selected_position = st.selectbox("Filter by Position", positions)
-        
-        if selected_position != 'ALL':
-            df_roster = df_roster[df_roster['position'] == selected_position]
-        
-        # Display roster
-        st.markdown(f"##### {selected_team_name} - {len(df_roster)} Players")
-        
-        # Group by position
-        for position in sorted(df_roster['position'].unique()):
-            with st.expander(f"{position} ({len(df_roster[df_roster['position'] == position])})"):
-                pos_players = df_roster[df_roster['position'] == position]
+            with st.expander(f"📊 {player} - {team} ({position})", expanded=True):
+                # Stats table
+                stats_table = player_data[['stat_type', 'value', 'rank']].copy()
+                stats_table.columns = ['Category', 'Value', 'Rank']
+                stats_table = stats_table.sort_values('Rank')
                 
-                for _, player in pos_players.iterrows():
-                    st.markdown(f"""
-                    <div style='background-color: #1A1A1A; padding: 10px; margin: 5px 0; border-left: 3px solid #00FF00; font-family: "Courier New", monospace;'>
-                        <span style='color: #00FF00; font-weight: bold;'>#{player['jersey']}</span> 
-                        <span style='color: #FFFFFF;'>{player['player_name']}</span><br>
-                        <span style='color: #888888; font-size: 11px;'>Age: {player['age']} | Ht: {player['height']} | Wt: {player['weight']}</span>
-                    </div>
-                    """, unsafe_allow_html=True)
+                st.dataframe(stats_table, use_container_width=True, hide_index=True)
+                
+                # Visualize top stats
+                if len(stats_table) > 0:
+                    fig = px.bar(
+                        stats_table.head(10),
+                        x='Category',
+                        y='Value',
+                        title=f"{player} - Top Statistics",
+                        template='plotly_dark',
+                        color='Value',
+                        color_continuous_scale='Viridis'
+                    )
+                    fig.update_layout(
+                        plot_bgcolor='#000000',
+                        paper_bgcolor='#1A1A1A',
+                        font_color='#00FF00'
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+    
+    # Leaderboards
+    st.markdown("---")
+    st.markdown("### 🏆 LEAGUE LEADERBOARDS")
+    
+    tab1, tab2, tab3, tab4 = st.tabs(["🎯 PASSING", "🏃 RUSHING", "🙌 RECEIVING", "🛡️ DEFENSE"])
+    
+    with tab1:
+        render_leaderboard("passing")
+    
+    with tab2:
+        render_leaderboard("rushing")
+    
+    with tab3:
+        render_leaderboard("receiving")
+    
+    with tab4:
+        render_leaderboard("defense")
+
+def render_leaderboard(stat_type: str):
+    """Render a statistical leaderboard"""
+    client = NFLVerseStatsClient()
+    
+    with st.spinner(f"Loading {stat_type} leaders..."):
+        df_stats = client.fetch_player_stats(stat_type)
+    
+    if df_stats.empty:
+        st.warning(f"No {stat_type} stats available")
+        return
+    
+    # Filter to top categories
+    top_categories = df_stats['stat_type'].value_counts().head(5).index.tolist()
+    
+    for category in top_categories:
+        st.markdown(f"#### {category}")
+        
+        cat_data = df_stats[df_stats['stat_type'] == category].sort_values('rank').head(10)
+        
+        for idx, row in cat_data.iterrows():
+            rank_color = '#FFD700' if row['rank'] <= 3 else '#00FF00'
+            
+            st.markdown(f"""
+            <div class='stat-card' style='border-left-color: {rank_color};'>
+                <span style='color: {rank_color}; font-weight: bold;'>#{int(row['rank'])}</span> 
+                <span style='color: #FFFFFF; font-weight: bold;'>{row['player_name']}</span> 
+                <span style='color: #888888;'>| {row['team']} | {row['position']}</span>
+                <span style='color: #00FF00; float: right; font-weight: bold;'>{row['value']:.1f}</span>
+            </div>
+            """, unsafe_allow_html=True)
 
 # =============================================================================
 # MAIN APPLICATION
 # =============================================================================
 
 def main():
+    """Main application logic"""
     apply_custom_css()
     render_header()
     
@@ -722,7 +591,6 @@ def main():
     if mode == "PLAYER STATS":
         render_player_stats_page()
         
-        # Refresh button
         st.sidebar.markdown("---")
         if st.sidebar.button("↻ REFRESH DATA"):
             st.cache_data.clear()
@@ -771,7 +639,8 @@ def main():
             else:
                 render_injury_item(row)
     else:
-        st.markdown(f"<p class='ticker'>NO {mode} DATA FOR {selected_team} IN {date_filter}</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='ticker'>NO {mode} DATA FOR {selected_team} IN {date_filter}</p>", 
+                   unsafe_allow_html=True)
     
     st.sidebar.markdown("---")
     if st.sidebar.button("↻ REFRESH DATA"):
