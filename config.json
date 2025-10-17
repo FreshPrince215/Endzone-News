@@ -4,155 +4,182 @@
     "page_icon": "🏈",
     "layout": "wide",
     "cache_ttl": 1800,
-    "max_workers": 10,
-    "days_lookback": 7
+    "days_lookback": 7,
+    "max_workers": 10
   },
   "teams": [
-    "Arizona Cardinals", "Atlanta Falcons", "Baltimore Ravens", "Buffalo Bills",
-    "Carolina Panthers", "Chicago Bears", "Cincinnati Bengals", "Cleveland Browns",
-    "Dallas Cowboys", "Denver Broncos", "Detroit Lions", "Green Bay Packers",
-    "Houston Texans", "Indianapolis Colts", "Jacksonville Jaguars", "Kansas City Chiefs",
-    "Las Vegas Raiders", "Los Angeles Chargers", "Los Angeles Rams", "Miami Dolphins",
-    "Minnesota Vikings", "New England Patriots", "New Orleans Saints", "New York Giants",
-    "New York Jets", "Philadelphia Eagles", "Pittsburgh Steelers", "San Francisco 49ers",
-    "Seattle Seahawks", "Tampa Bay Buccaneers", "Tennessee Titans", "Washington Commanders"
+    "Arizona Cardinals",
+    "Atlanta Falcons",
+    "Baltimore Ravens",
+    "Buffalo Bills",
+    "Carolina Panthers",
+    "Chicago Bears",
+    "Cincinnati Bengals",
+    "Cleveland Browns",
+    "Dallas Cowboys",
+    "Denver Broncos",
+    "Detroit Lions",
+    "Green Bay Packers",
+    "Houston Texans",
+    "Indianapolis Colts",
+    "Jacksonville Jaguars",
+    "Kansas City Chiefs",
+    "Las Vegas Raiders",
+    "Los Angeles Chargers",
+    "Los Angeles Rams",
+    "Miami Dolphins",
+    "Minnesota Vikings",
+    "New England Patriots",
+    "New Orleans Saints",
+    "New York Giants",
+    "New York Jets",
+    "Philadelphia Eagles",
+    "Pittsburgh Steelers",
+    "San Francisco 49ers",
+    "Seattle Seahawks",
+    "Tampa Bay Buccaneers",
+    "Tennessee Titans",
+    "Washington Commanders"
   ],
   "rss_feeds": {
     "general_news": [
-      {"name": "NFL Official", "url": "https://www.nfl.com/feeds/rss/home", "enabled": true},
-      {"name": "ESPN NFL", "url": "https://www.espn.com/espn/rss/nfl/news", "enabled": true},
-      {"name": "CBS Sports", "url": "https://www.cbssports.com/rss/headlines/nfl/", "enabled": true},
-      {"name": "NBC Sports", "url": "https://www.nbcsports.com/feed", "enabled": true},
-      {"name": "Fox Sports", "url": "https://api.foxsports.com/v1/rss?partnerKey=zBaFxRyGKCfxBagJG9b8pqLyndmvo7UU&tag=nfl", "enabled": true}
+      {
+        "url": "https://www.espn.com/espn/rss/nfl/news",
+        "enabled": true
+      },
+      {
+        "url": "https://www.yardbarker.com/rss/sport_merged/2",
+        "enabled": true
+      },
+      {
+        "url": "https://www.profootballnetwork.com/feed/",
+        "enabled": true
+      },
+      {
+        "url": "https://www.dailymail.co.uk/sport/nfl/index.rss",
+        "enabled": true
+      },
+      {
+        "url": "https://feeds.bbci.co.uk/sport/american-football/rss.xml",
+        "enabled": true
+      },
+      {
+        "url": "https://www.nytimes.com/athletic/rss/nfl/",
+        "enabled": true
+      },
+      {
+        "url": "https://clutchpoints.com/nfl/feed",
+        "enabled": true
+      },
+      {
+        "url": "https://www.nbcsports.com/nfl.atom",
+        "enabled": true
+      },
+      {
+        "url": "https://www.foxsports.com/nfl/rss",
+        "enabled": true
+      },
+      {
+        "url": "https://www.cbssports.com/rss/headlines/nfl/",
+        "enabled": true
+      }
     ],
     "team_feeds": {
       "Arizona Cardinals": [
-        "https://www.azcardinals.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=ARI"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=ari"
       ],
       "Atlanta Falcons": [
-        "https://www.atlantafalcons.com/rss/article",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=ATL"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=atl"
       ],
       "Baltimore Ravens": [
-        "https://www.baltimoreravens.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=BAL"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=bal"
       ],
       "Buffalo Bills": [
-        "https://www.buffalobills.com/rss/article",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=BUF"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=buf"
       ],
       "Carolina Panthers": [
-        "https://www.panthers.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CAR"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=car"
       ],
       "Chicago Bears": [
-        "https://www.chicagobears.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CHI"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=chi"
       ],
       "Cincinnati Bengals": [
-        "https://www.bengals.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CIN"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=cin"
       ],
       "Cleveland Browns": [
-        "https://www.clevelandbrowns.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CLE"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=cle"
       ],
       "Dallas Cowboys": [
-        "https://www.dallascowboys.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DAL"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=dal"
       ],
       "Denver Broncos": [
-        "https://www.denverbroncos.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DEN"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=den"
       ],
       "Detroit Lions": [
-        "https://www.detroitlions.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DET"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=det"
       ],
       "Green Bay Packers": [
-        "https://www.packers.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=GB"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=gb"
       ],
       "Houston Texans": [
-        "https://www.houstontexans.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=HOU"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=hou"
       ],
       "Indianapolis Colts": [
-        "https://www.colts.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=IND"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=ind"
       ],
       "Jacksonville Jaguars": [
-        "https://www.jaguars.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=JAX"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=jax"
       ],
       "Kansas City Chiefs": [
-        "https://www.chiefs.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=KC"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=kc"
       ],
       "Las Vegas Raiders": [
-        "https://www.raiders.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LV"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=lv"
       ],
       "Los Angeles Chargers": [
-        "https://www.chargers.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LAC"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=lac"
       ],
       "Los Angeles Rams": [
-        "https://www.therams.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LAR"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=lar"
       ],
       "Miami Dolphins": [
-        "https://www.miamidolphins.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=MIA"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=mia"
       ],
       "Minnesota Vikings": [
-        "https://www.vikings.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=MIN"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=min"
       ],
       "New England Patriots": [
-        "https://www.patriots.com/rss/article",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NE"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=ne"
       ],
       "New Orleans Saints": [
-        "https://www.neworleanssaints.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NO"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=no"
       ],
       "New York Giants": [
-        "https://www.giants.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NYG"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=nyg"
       ],
       "New York Jets": [
-        "https://www.newyorkjets.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NYJ"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=nyj"
       ],
       "Philadelphia Eagles": [
-        "https://www.philadelphiaeagles.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=PHI"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=phi"
       ],
       "Pittsburgh Steelers": [
-        "https://www.steelers.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=PIT"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=pit"
       ],
       "San Francisco 49ers": [
-        "https://www.49ers.com/rss/article",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=SF"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=sf"
       ],
       "Seattle Seahawks": [
-        "https://www.seahawks.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=SEA"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=sea"
       ],
       "Tampa Bay Buccaneers": [
-        "https://www.buccaneers.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=TB"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=tb"
       ],
       "Tennessee Titans": [
-        "https://www.tennesseetitans.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=TEN"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=ten"
       ],
       "Washington Commanders": [
-        "https://www.commanders.com/rss/news",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=WAS"
+        "https://www.espn.com/espn/rss/nfl/teams/news?team=was"
       ]
     }
   },
@@ -161,11 +188,13 @@
       "background": "#000000",
       "primary_color": "#00FF00",
       "secondary_color": "#FF0000",
-      "text_color": "#FFFFFF",
       "meta_color": "#888888"
     },
-    "time_ranges": ["24H", "3D", "7D"],
-    "default_time_range": "7D",
-    "items_per_page": 50
+    "time_ranges": [
+      "24H",
+      "3D",
+      "7D"
+    ],
+    "default_time_range": "7D"
   }
 }
