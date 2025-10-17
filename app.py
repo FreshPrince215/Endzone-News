@@ -9,7 +9,10 @@ from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import streamlit as st
-import plotly.express as px
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # =============================================================================
 # CONFIGURATION
@@ -26,8 +29,11 @@ def load_config() -> Dict:
     
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            config = json.load(f)
+        logging.info("Config loaded successfully")
+        return config
     except Exception as e:
+        logging.error(f"Error loading config: {e}")
         st.error(f"❌ Error loading config.json: {e}")
         st.stop()
 
@@ -66,9 +72,7 @@ class ESPNInjuryClient:
         try:
             url = f"{self.BASE_URL}/injuries"
             response = self.session.get(url, timeout=15)
-            
-            if response.status_code != 200:
-                return pd.DataFrame()
+            response.raise_for_status()
             
             data = response.json()
             injuries = []
@@ -79,7 +83,6 @@ class ESPNInjuryClient:
                 for player_data in team_data.get('injuries', []):
                     athlete = player_data.get('athlete', {})
                     
-                    # Only include if there's actually an injury status
                     status = player_data.get('status', '')
                     if not status or status.lower() == 'active':
                         continue
@@ -98,17 +101,19 @@ class ESPNInjuryClient:
                 return pd.DataFrame()
             
             df = pd.DataFrame(injuries)
-            
-            # Classify severity
             df['severity'] = df['status'].apply(self._classify_severity)
-            
-            # Remove duplicates
             df = df.drop_duplicates(subset=['player', 'team'])
             df = df.sort_values('date', ascending=False)
             
+            logging.info(f"Fetched {len(df)} injuries")
             return df
             
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Network error fetching injuries: {e}")
+            st.error(f"Error fetching injuries: {e}")
+            return pd.DataFrame()
         except Exception as e:
+            logging.error(f"Unexpected error fetching injuries: {e}")
             st.error(f"Error fetching injuries: {e}")
             return pd.DataFrame()
     
@@ -159,7 +164,8 @@ class FeedFetcher:
                     })
             
             return articles
-        except:
+        except Exception as e:
+            logging.warning(f"Error fetching feed {url}: {e}")
             return []
     
     def fetch_multiple_feeds(self, feeds: List[str], max_workers: int = 10) -> List[Dict]:
@@ -170,7 +176,10 @@ class FeedFetcher:
             futures = {executor.submit(self.fetch_single_feed, url): url for url in feeds}
             
             for future in as_completed(futures):
-                articles.extend(future.result())
+                try:
+                    articles.extend(future.result())
+                except Exception as e:
+                    logging.warning(f"Error in future for {futures[future]}: {e}")
         
         return articles
 
@@ -231,60 +240,65 @@ class DataProcessor:
 # =============================================================================
 
 class NFLVerseStatsClient:
-    """Fetch player stats using nflfastR-style data"""
-    
-    BASE_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl"
+    """Fetch player stats from ESPN web pages"""
     
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({'User-Agent': 'Mozilla/5.0'})
-        self.current_season = datetime.now().year
     
     def fetch_player_stats(self, stat_type: str = 'passing') -> pd.DataFrame:
         """Fetch player statistics by type"""
         try:
-            category_map = {
-                'passing': 'passingYards',
-                'rushing': 'rushingYards',
-                'receiving': 'receivingYards',
-                'defense': 'sacks'
-            }
-            category_display_map = {
-                'passingYards': 'Passing Yards',
-                'rushingYards': 'Rushing Yards',
-                'receivingYards': 'Receiving Yards',
-                'sacks': 'Sacks'
-            }
-            
-            category = category_map.get(stat_type, 'passingYards')
-            display_name = category_display_map.get(category, stat_type.capitalize())
-            url = f"{self.BASE_URL}/leaders?category={category}&season={self.current_season}&seasontype=2"
-            
-            response = self.session.get(url, timeout=15)
-            
-            if response.status_code != 200:
+            base_url = "https://www.espn.com/nfl/stats/player/_/stat/"
+            if stat_type == 'defense':
+                url = base_url + "defense/table/defensive/sort/sacks/dir/desc"
+                value_col = 'SACK'
+                stat_name = 'Sacks'
+            elif stat_type == 'passing':
+                url = base_url + "passing"
+                value_col = 'YDS'
+                stat_name = 'Passing Yards'
+            elif stat_type == 'rushing':
+                url = base_url + "rushing"
+                value_col = 'YDS'
+                stat_name = 'Rushing Yards'
+            elif stat_type == 'receiving':
+                url = base_url + "receiving"
+                value_col = 'YDS'
+                stat_name = 'Receiving Yards'
+            else:
                 return pd.DataFrame()
             
-            data = response.json()
-            leaders = data.get('leaders', [])
-            players = []
+            dfs = pd.read_html(url)
+            if len(dfs) < 2:
+                return pd.DataFrame()
             
-            for leader in leaders:
-                athlete = leader.get('athlete', {})
-                team = leader.get('team', {})
-                
-                players.append({
-                    'player_name': athlete.get('displayName', 'Unknown'),
-                    'team': team.get('displayName', 'FA'),
-                    'position': athlete.get('position', {}).get('abbreviation', 'N/A'),
-                    'stat_type': display_name,
-                    'value': float(leader.get('value', 0)),
-                    'rank': int(leader.get('rank', 999))
-                })
+            df1 = dfs[0]
+            df2 = dfs[1]
+            df = pd.concat([df1, df2], axis=1)
+            df = df.dropna(subset=['RK']).reset_index(drop=True)
             
-            return pd.DataFrame(players) if players else pd.DataFrame()
+            df['rank'] = df['RK'].astype(int)
+            df['position'] = df['POS']
+            df['value'] = df[value_col].str.replace(',', '').astype(float)
+            df['stat_type'] = stat_name
+            
+            # Parse player and team
+            def parse_player_team(player_str):
+                match = re.match(r'^(.*?) ([A-Z/]{2,})$', player_str)
+                if match:
+                    return match.group(1), match.group(2)
+                return player_str, 'FA'
+            
+            df[['player_name', 'team']] = df['PLAYER'].apply(parse_player_team).apply(pd.Series)
+            
+            df = df[['player_name', 'team', 'position', 'stat_type', 'value', 'rank']]
+            
+            logging.info(f"Fetched {len(df)} {stat_type} stats")
+            return df.sort_values('rank')
             
         except Exception as e:
+            logging.error(f"Error fetching {stat_type} stats: {e}")
             return pd.DataFrame()
     
     def search_player(self, player_name: str) -> pd.DataFrame:
@@ -301,7 +315,6 @@ class NFLVerseStatsClient:
         
         df_all = pd.concat(all_stats, ignore_index=True)
         
-        # Filter by player name (case-insensitive partial match)
         mask = df_all['player_name'].str.contains(player_name, case=False, na=False)
         return df_all[mask]
 
@@ -343,12 +356,14 @@ def fetch_news_data() -> pd.DataFrame:
             })
     
     if not news_items:
+        logging.warning("No news items fetched")
         return pd.DataFrame()
     
     df = pd.DataFrame(news_items)
     df = DataProcessor.deduplicate_dataframe(df, ['headline', 'link'])
     df = df.sort_values('date', ascending=False)
     
+    logging.info(f"Fetched {len(df)} news items")
     return df
 
 @st.cache_data(ttl=APP.get('cache_ttl', 1800), show_spinner=False)
@@ -503,27 +518,14 @@ def render_player_stats_page():
                 # Stats table
                 stats_table = player_data[['stat_type', 'value', 'rank']].copy()
                 stats_table.columns = ['Category', 'Value', 'Rank']
-                stats_table = stats_table.sort_values('rank')
+                stats_table = stats_table.sort_values('Rank')
                 
                 st.dataframe(stats_table, use_container_width=True, hide_index=True)
                 
                 # Visualize top stats
                 if len(stats_table) > 0:
-                    fig = px.bar(
-                        stats_table.head(10),
-                        x='Category',
-                        y='Value',
-                        title=f"{player} - Top Statistics",
-                        template='plotly_dark',
-                        color='Value',
-                        color_continuous_scale='Viridis'
-                    )
-                    fig.update_layout(
-                        plot_bgcolor='#000000',
-                        paper_bgcolor='#1A1A1A',
-                        font_color='#00FF00'
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.markdown(f"#### {player} - Top Statistics")
+                    st.bar_chart(stats_table.head(10), x='Category', y='Value')
     
     # Leaderboards
     st.markdown("---")
@@ -554,8 +556,7 @@ def render_leaderboard(stat_type: str):
         st.warning(f"No {stat_type} stats available")
         return
     
-    # Since single category
-    category = df_stats['stat_type'].iloc[0] if not df_stats.empty else stat_type.capitalize()
+    category = df_stats['stat_type'].iloc[0]
     st.markdown(f"#### {category}")
     
     cat_data = df_stats.sort_values('rank').head(10)
