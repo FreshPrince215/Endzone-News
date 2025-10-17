@@ -21,8 +21,6 @@
     "general_news": [
       {"name": "NFL Official", "url": "https://www.nfl.com/feeds/rss/home", "enabled": true},
       {"name": "ESPN NFL", "url": "https://www.espn.com/espn/rss/nfl/news", "enabled": true},
-      {"name": "CBS Sports", "url": "https://www.cbssports.com/rss/headlines/nfl/", "enabled": true},
-      {"name": "NBC Sports", "url": "https://www.nbcsports.com/feed", "enabled": true},
       {"name": "Fox Sports", "url": "https://api.foxsports.com/v1/rss?partnerKey=zBaFxRyGKCfxBagJG9b8pqLyndmvo7UU&tag=nfl", "enabled": true},
       {"name": "Yardbarker NFL", "url": "https://www.yardbarker.com/rss/sport_merged/2", "enabled": true},
       {"name": "Pro Football Network", "url": "https://www.profootballnetwork.com/feed/", "enabled": true},
