@@ -1,8 +1,41 @@
 {
   "rss_feeds": {
     "general_news": [
-      "https://www.nfl.com/feeds/rss"
- 
+      {
+        "url": "https://www.espn.com/espn/rss/nfl/news",
+        "name": "ESPN NFL",
+        "enabled": true
+      },
+      {
+        "url": "https://www.nfl.com/feeds/rss",
+        "name": "NFL Official",
+        "enabled": true
+      },
+      {
+        "url": "https://www.nbcsports.com/profootballtalk.rss",
+        "name": "NBC PFT",
+        "enabled": true
+      },
+      {
+        "url": "https://www.nbcsports.com/edge/rss/football/nfl/player-news",
+        "name": "NBC Edge NFL",
+        "enabled": true
+      },
+      {
+        "url": "https://sports.yahoo.com/nfl/rss/",
+        "name": "Yahoo NFL",
+        "enabled": true
+      },
+      {
+        "url": "https://api.foxsports.com/v2/content/optimized-rss?partnerKey=MB0Wehpmuj2lUhuRhQaafhBjAJqaPU244mlTDK1i&size=30&tags=fs/nfl",
+        "name": "Fox Sports NFL",
+        "enabled": true
+      },
+      {
+        "url": "https://www.nytimes.com/athletic/rss/nfl/",
+        "name": "NYT Athletic NFL",
+        "enabled": true
+      }
     ],
     "team_feeds": {
       "Arizona Cardinals": [
