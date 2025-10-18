@@ -1,6 +1,6 @@
 """
-NFL News Hub - Apple-Inspired Design
-Premium NFL news aggregation with minimalist design
+EndzoneHubV1 
+Professional dark theme with real-time news aggregation
 """
 
 import feedparser
@@ -197,281 +197,397 @@ def fetch_all_news() -> pd.DataFrame:
     return df
 
 # =============================================================================
-# APPLE-STYLE UI
+# BLOOMBERG TERMINAL UI
 # =============================================================================
 
-def apply_apple_css():
-    """Apply Apple Store inspired CSS"""
+def apply_bloomberg_css():
+    """Apply Bloomberg Terminal inspired CSS"""
     st.markdown("""
     <style>
-        /* Global Styles */
-        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
+        /* Global Dark Theme */
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
         
-        .main {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #12172e;
+            --bg-tertiary: #1a1f3a;
+            --accent-orange: #ff8c00;
+            --accent-blue: #00a0dc;
+            --accent-green: #00d084;
+            --text-primary: #e8e8e8;
+            --text-secondary: #a0a0a0;
+            --border-color: #2a2f4a;
         }
         
         .stApp {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: var(--bg-primary);
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
         }
         
-        /* Header */
-        .main-header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            text-align: center;
+        .main {
+            background-color: var(--bg-primary);
         }
         
-        .main-title {
-            font-size: 48px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            letter-spacing: -1px;
+        /* Terminal Header */
+        .terminal-header {
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-bottom: 2px solid var(--accent-orange);
+            padding: 20px 30px;
+            margin: -20px -20px 30px -20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .main-subtitle {
-            font-size: 18px;
-            color: #86868b;
-            font-weight: 400;
-        }
-        
-        /* News Card */
-        .news-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.1);
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .news-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.2);
-        }
-        
-        .news-headline {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1d1d1f;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 12px;
-            line-height: 1.4;
-            transition: color 0.2s ease;
-        }
-        
-        .news-headline:hover {
-            color: #667eea;
-        }
-        
-        .news-meta {
+        .terminal-logo {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 13px;
-            color: #86868b;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
+            gap: 15px;
         }
         
-        .news-summary {
-            font-size: 15px;
-            color: #6e6e73;
-            line-height: 1.6;
-            margin-top: 8px;
-        }
-        
-        .team-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        
-        .source-badge {
-            padding: 4px 10px;
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .date-badge {
-            font-size: 12px;
-            color: #86868b;
-        }
-        
-        /* Filter Bar */
-        .filter-bar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 32px;
-            box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.1);
-        }
-        
-        /* Stats Bar */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-        
-        .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.1);
-        }
-        
-        .stat-number {
-            font-size: 36px;
+        .terminal-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 24px;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
+            color: var(--accent-orange);
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
         
-        .stat-label {
-            font-size: 14px;
-            color: #86868b;
-            font-weight: 500;
+        .terminal-subtitle {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--accent-green);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
         
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        
+        /* Control Panel */
+        .control-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .control-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        /* Stats Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-box {
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--accent-orange);
+            padding: 15px 20px;
+            border-radius: 0;
+        }
+        
+        .stat-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent-orange);
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        
+        /* News Feed */
+        .news-item {
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--accent-blue);
+            padding: 18px 20px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .news-item:hover {
+            background: var(--bg-tertiary);
+            border-left-color: var(--accent-orange);
+            transform: translateX(3px);
+        }
+        
+        .news-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .news-timestamp {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--accent-green);
+            min-width: 80px;
+            font-weight: 600;
+        }
+        
+        .news-team {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            background: var(--accent-orange);
+            color: #000;
+            padding: 3px 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .news-source {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .news-headline {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: block;
+            line-height: 1.5;
+            margin-bottom: 8px;
+            transition: color 0.2s ease;
+        }
+        
+        .news-headline:hover {
+            color: var(--accent-orange);
+        }
+        
+        .news-summary {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+        
+        /* Team Grid */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .team-button {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .team-button:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+        }
+        
+        .team-button.active {
+            background: var(--accent-orange);
+            border-color: var(--accent-orange);
+            color: #000;
+        }
+        
         /* Streamlit Overrides */
         .stSelectbox > div > div {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            border: none;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            color: var(--text-primary);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        
+        .stSelectbox label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
         
         .stButton > button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 12px 32px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--accent-orange);
+            color: var(--accent-orange);
+            border-radius: 0;
+            padding: 10px 24px;
+            font-family: 'IBM Plex Mono', monospace;
             font-weight: 600;
-            transition: all 0.3s ease;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
         }
         
         .stButton > button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px 0 rgba(102, 126, 234, 0.4);
+            background: var(--accent-orange);
+            color: #000;
         }
         
-        /* Hide Streamlit branding */
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-orange);
+            border-radius: 0;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff9d1f;
+        }
+        
+        /* Hide Streamlit elements */
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
+        .stDeployButton {display: none;}
+        
+        /* Section Headers */
+        .section-header {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            color: var(--accent-orange);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
     </style>
     """, unsafe_allow_html=True)
 
-def render_header():
-    """Render Apple-style header"""
-    st.markdown("""
-    <div class="main-header">
-        <div class="main-title">🏈 NFL News Hub</div>
-        <div class="main-subtitle">Your premium source for NFL news across all teams</div>
+def render_terminal_header():
+    """Render Bloomberg-style terminal header"""
+    current_time = datetime.now().strftime('%H:%M:%S EST')
+    
+    st.markdown(f"""
+    <div class="terminal-header">
+        <div class="terminal-logo">
+            <div>
+                <div class="terminal-title">🏈 NFL TERMINAL</div>
+                <div class="terminal-subtitle">Professional News Aggregation System</div>
+            </div>
+        </div>
+        <div>
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                LIVE | {current_time}
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-def render_filters() -> Tuple[str, str]:
-    """Render filter controls"""
-    col1, col2, col3 = st.columns([2, 2, 1])
-    
-    with col1:
-        team_options = ['All Teams'] + sorted(TEAMS)
-        selected_team = st.selectbox('📍 Filter by Team', team_options, label_visibility="collapsed", 
-                                     key='team_filter', help="Filter news by specific team")
-    
-    with col2:
-        time_options = {
-            'Last 24 Hours': 1,
-            'Last 3 Days': 3,
-            'Last Week': 7
-        }
-        selected_time = st.selectbox('⏰ Time Range', list(time_options.keys()), 
-                                     index=2, label_visibility="collapsed", key='time_filter')
-    
-    with col3:
-        if st.button("🔄 Refresh", use_container_width=True):
-            st.cache_data.clear()
-            st.rerun()
-    
-    return selected_team, time_options[selected_time]
-
-def render_stats(df: pd.DataFrame):
-    """Render statistics cards"""
+def render_stats_dashboard(df: pd.DataFrame):
+    """Render stats dashboard"""
     if df.empty:
         return
     
-    st.markdown("""
-    <div class="stats-container">
-        <div class="stat-card">
-            <div class="stat-number">{}</div>
-            <div class="stat-label">Total Articles</div>
+    total_articles = len(df)
+    teams_covered = df['team'].nunique()
+    sources = df['source'].nunique()
+    last_update = datetime.now().strftime('%H:%M')
+    
+    st.markdown(f"""
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-value">{total_articles}</div>
+            <div class="stat-label">TOTAL ARTICLES</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">{}</div>
-            <div class="stat-label">Teams Covered</div>
+        <div class="stat-box">
+            <div class="stat-value">{teams_covered}</div>
+            <div class="stat-label">TEAMS TRACKED</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">{}</div>
-            <div class="stat-label">News Sources</div>
+        <div class="stat-box">
+            <div class="stat-value">{sources}</div>
+            <div class="stat-label">DATA SOURCES</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">{}</div>
-            <div class="stat-label">Last Updated</div>
+        <div class="stat-box">
+            <div class="stat-value">{last_update}</div>
+            <div class="stat-label">LAST REFRESH</div>
         </div>
     </div>
-    """.format(
-        len(df),
-        df['team'].nunique(),
-        df['source'].nunique(),
-        datetime.now().strftime('%I:%M %p')
-    ), unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-def render_news_card(row: pd.Series):
-    """Render individual news card"""
+def render_news_item(row: pd.Series):
+    """Render individual news item"""
     time_ago = get_time_ago(row['date'])
+    timestamp = row['date'].strftime('%H:%M')
     
     summary_html = f"<div class='news-summary'>{row['summary']}</div>" if row['summary'] else ""
     
     st.markdown(f"""
-    <div class="news-card">
+    <div class="news-item">
+        <div class="news-header">
+            <span class="news-timestamp">{timestamp}</span>
+            <span class="news-team">{row['team']}</span>
+            <span class="news-source">{row['source']}</span>
+        </div>
         <a href="{row['link']}" target="_blank" class="news-headline">
             {row['headline']}
         </a>
-        <div class="news-meta">
-            <span class="team-badge">{row['team']}</span>
-            <span class="source-badge">{row['source']}</span>
-            <span class="date-badge">⏱️ {time_ago}</span>
-        </div>
         {summary_html}
     </div>
     """, unsafe_allow_html=True)
@@ -498,41 +614,72 @@ def get_time_ago(date: datetime) -> str:
 
 def main():
     """Main application"""
-    apply_apple_css()
-    render_header()
+    apply_bloomberg_css()
+    render_terminal_header()
     
-    # Filters
-    selected_team, days_back = render_filters()
+    # Control Panel
+    col1, col2, col3 = st.columns([3, 2, 1])
+    
+    with col1:
+        st.markdown('<div class="control-label">SELECT TEAM</div>', unsafe_allow_html=True)
+        team_options = ['ALL TEAMS'] + sorted(TEAMS)
+        selected_team = st.selectbox(
+            'Team Filter',
+            team_options,
+            label_visibility="collapsed",
+            key='team_filter'
+        )
+    
+    with col2:
+        st.markdown('<div class="control-label">TIME RANGE</div>', unsafe_allow_html=True)
+        time_options = {
+            'LAST 24 HOURS': 1,
+            'LAST 3 DAYS': 3,
+            'LAST 7 DAYS': 7
+        }
+        selected_time = st.selectbox(
+            'Time Range',
+            list(time_options.keys()),
+            index=2,
+            label_visibility="collapsed",
+            key='time_filter'
+        )
+    
+    with col3:
+        st.markdown('<div class="control-label">ACTIONS</div>', unsafe_allow_html=True)
+        if st.button("⟳ REFRESH", use_container_width=True):
+            st.cache_data.clear()
+            st.rerun()
     
     # Load data
-    with st.spinner('Loading latest NFL news...'):
+    with st.spinner('■ LOADING MARKET DATA...'):
         df = fetch_all_news()
     
     if df.empty:
-        st.warning("No news available at this time. Please try again later.")
+        st.warning("⚠ NO DATA AVAILABLE | CHECK FEED SOURCES")
         return
     
     # Filter by team
-    if selected_team != 'All Teams':
+    if selected_team != 'ALL TEAMS':
         df_filtered = df[df['team'] == selected_team].copy()
     else:
         df_filtered = df.copy()
     
     # Filter by date
-    cutoff = datetime.now() - timedelta(days=days_back)
+    cutoff = datetime.now() - timedelta(days=time_options[selected_time])
     df_filtered = df_filtered[df_filtered['date'] >= cutoff]
     
     # Render stats
-    render_stats(df_filtered)
+    render_stats_dashboard(df_filtered)
     
-    # Render news cards
+    # Render news feed
     if not df_filtered.empty:
-        st.markdown(f"### 📰 {len(df_filtered)} Articles")
+        st.markdown(f'<div class="section-header">NEWS FEED — {len(df_filtered)} ITEMS</div>', unsafe_allow_html=True)
         
         for _, row in df_filtered.iterrows():
-            render_news_card(row)
+            render_news_item(row)
     else:
-        st.info(f"No articles found for {selected_team} in the selected time range.")
+        st.info(f"⚠ NO ARTICLES FOUND | {selected_team} | {selected_time}")
 
 if __name__ == "__main__":
     main()
