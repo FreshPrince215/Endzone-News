@@ -48,18 +48,8 @@
         "enabled": true
       },
       {
-        "name": "Yahoo Sports NFL",
-        "url": "https://sports.yahoo.com/nfl/rss/",
-        "enabled": true
-      },
-      {
-        "name": "FOX Sports NFL",
-        "url": "https://api.foxsports.com/v1/rss?partnerKey=zBaFxRyGKCfxBagJG9b8pqLyndmvo7UU&tag=nfl",
-        "enabled": true
-      },
-      {
         "name": "NFL.com",
-        "url": "https://www.nfl.com/rss/rss.xml",
+        "url": "https://www.nfl.com/feeds/rss/news",
         "enabled": true
       },
       {
@@ -68,317 +58,169 @@
         "enabled": true
       },
       {
-        "name": "Sports Illustrated NFL",
-        "url": "https://www.si.com/rss/si_nfl.rss",
-        "enabled": true
-      },
-      {
         "name": "Pro Football Talk",
         "url": "https://profootballtalk.nbcsports.com/feed/",
         "enabled": true
       },
       {
-        "name": "Reddit NFL",
-        "url": "https://www.reddit.com/r/nfl.rss",
-        "enabled": true
-      },
-      {
-        "name": "Reddit CFB",
-        "url": "https://www.reddit.com/r/CFB.rss",
-        "enabled": true
-      },
-      {
         "name": "Bleacher Report NFL",
-        "url": "https://syndication.bleacherreport.com/amp/nfl.xml",
+        "url": "https://bleacherreport.com/articles/feed?tag_id=16",
         "enabled": true
       },
       {
-        "name": "RotoWire NFL",
-        "url": "https://www.rotowire.com/rss/news.php?sport=NFL",
+        "name": "USA Today NFL",
+        "url": "https://www.usatoday.com/sports/nfl/rss/",
         "enabled": true
       },
       {
-        "name": "Yardbarker NFL",
-        "url": "https://www.yardbarker.com/rss/sport_merged/2",
+        "name": "Yahoo Sports NFL",
+        "url": "https://sports.yahoo.com/nfl/rss.xml",
         "enabled": true
       },
       {
-        "name": "Pro Football Network",
-        "url": "https://www.profootballnetwork.com/feed/",
+        "name": "The Athletic NFL",
+        "url": "https://theathletic.com/nfl/feed/",
         "enabled": true
       },
       {
-        "name": "BBC Sport NFL",
-        "url": "https://feeds.bbci.co.uk/sport/american-football/rss.xml",
+        "name": "Sports Illustrated NFL",
+        "url": "https://www.si.com/rss/si_nfl.rss",
         "enabled": true
       },
       {
-        "name": "ClutchPoints NFL",
-        "url": "https://clutchpoints.com/nfl/feed",
-        "enabled": true
-      },
-      {
-        "name": "NBC Sports NFL",
-        "url": "https://www.nbcsports.com/nfl.atom",
-        "enabled": true
-      },
-      {
-        "name": "Heavy NFL",
-        "url": "https://heavy.com/sports/nfl/feed/",
-        "enabled": true
-      },
-      {
-        "name": "Larry Brown Sports NFL",
-        "url": "https://larrybrownsports.com/category/football/feed",
+        "name": "Fox Sports NFL",
+        "url": "https://api.foxsports.com/v1/rss?partnerKey=zBaFxRyGKCfxBagJG9b8pqLyndmvo7UU&tag=nfl",
         "enabled": true
       }
     ],
     "team_feeds": {
       "Arizona Cardinals": [
-        {"name": "Cardinals Official", "url": "https://www.azcardinals.com/rss/news"},
-        {"name": "Reddit r/AZCardinals", "url": "https://www.reddit.com/r/AZCardinals.rss"},
-        {"name": "Beat: Cardschatter", "url": "https://rsshub.app/twitter/user/Cardschatter"},
-        {"name": "Beat: azbobbymac", "url": "https://rsshub.app/twitter/user/azbobbymac"},
-        {"name": "Beat: BoBrack", "url": "https://rsshub.app/twitter/user/BoBrack"},
-        {"name": "Beat: JohnnyVenerable", "url": "https://rsshub.app/twitter/user/JohnnyVenerable"},
-        {"name": "Beat: CraigAZSports", "url": "https://rsshub.app/twitter/user/CraigAZSports"}
+        "https://www.azcardinals.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/ari"
       ],
       "Atlanta Falcons": [
-        {"name": "Falcons Official", "url": "https://www.atlantafalcons.com/rss/news"},
-        {"name": "Reddit r/falcons", "url": "https://www.reddit.com/r/falcons.rss"},
-        {"name": "Beat: DOrlandoLED", "url": "https://rsshub.app/twitter/user/DOrlandoLED"},
-        {"name": "Beat: Tori_McElhaney", "url": "https://rsshub.app/twitter/user/Tori_McElhaney"},
-        {"name": "Beat: marcraimondi", "url": "https://rsshub.app/twitter/user/marcraimondi"},
-        {"name": "Beat: ZachKleinWSB", "url": "https://rsshub.app/twitter/user/ZachKleinWSB"},
-        {"name": "Beat: DOrlandoAJC", "url": "https://rsshub.app/twitter/user/DOrlandoAJC"}
+        "https://www.atlantafalcons.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/atl"
       ],
       "Baltimore Ravens": [
-        {"name": "Ravens Official", "url": "https://www.baltimoreravens.com/rss/news"},
-        {"name": "Reddit r/ravens", "url": "https://www.reddit.com/r/ravens.rss"},
-        {"name": "Beat: jamisonhensley", "url": "https://rsshub.app/twitter/user/jamisonhensley"},
-        {"name": "Beat: jeffzrebiec", "url": "https://rsshub.app/twitter/user/jeffzrebiec"},
-        {"name": "Beat: jonas_shaffer", "url": "https://rsshub.app/twitter/user/jonas_shaffer"}
+        "https://www.baltimoreravens.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/bal"
       ],
       "Buffalo Bills": [
-        {"name": "Bills Official", "url": "https://www.buffalobills.com/rss/news"},
-        {"name": "Reddit r/buffalobills", "url": "https://www.reddit.com/r/buffalobills.rss"},
-        {"name": "Beat: SalMaiorana", "url": "https://rsshub.app/twitter/user/SalMaiorana"},
-        {"name": "Beat: SalSports", "url": "https://rsshub.app/twitter/user/SalSports"},
-        {"name": "Beat: JoeBuscaglia", "url": "https://rsshub.app/twitter/user/JoeBuscaglia"},
-        {"name": "Beat: MattParrino", "url": "https://rsshub.app/twitter/user/MattParrino"},
-        {"name": "Beat: JaySkurski", "url": "https://rsshub.app/twitter/user/JaySkurski"}
+        "https://www.buffalobills.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/buf"
       ],
       "Carolina Panthers": [
-        {"name": "Panthers Official", "url": "https://www.panthers.com/rss/news"},
-        {"name": "Reddit r/panthers", "url": "https://www.reddit.com/r/panthers.rss"},
-        {"name": "Beat: JosephPerson", "url": "https://rsshub.app/twitter/user/JosephPerson"},
-        {"name": "Beat: DarinGantt", "url": "https://rsshub.app/twitter/user/DarinGantt"},
-        {"name": "Beat: Sheena_Marie3", "url": "https://rsshub.app/twitter/user/Sheena_Marie3"},
-        {"name": "Beat: josephperson", "url": "https://rsshub.app/twitter/user/josephperson"}
+        "https://www.panthers.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/car"
       ],
       "Chicago Bears": [
-        {"name": "Bears Official", "url": "https://www.chicagobears.com/rss/news"},
-        {"name": "Reddit r/CHIBears", "url": "https://www.reddit.com/r/CHIBears.rss"},
-        {"name": "Beat: BradBiggs", "url": "https://rsshub.app/twitter/user/BradBiggs"},
-        {"name": "Beat: kfishbain", "url": "https://rsshub.app/twitter/user/kfishbain"},
-        {"name": "Beat: adamjahns", "url": "https://rsshub.app/twitter/user/adamjahns"},
-        {"name": "Beat: danwiederer", "url": "https://rsshub.app/twitter/user/danwiederer"}
+        "https://www.chicagobears.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/chi"
       ],
       "Cincinnati Bengals": [
-        {"name": "Bengals Official", "url": "https://www.bengals.com/rss/news"},
-        {"name": "Reddit r/bengals", "url": "https://www.reddit.com/r/bengals.rss"},
-        {"name": "Beat: PaulDehnerJr", "url": "https://rsshub.app/twitter/user/PaulDehnerJr"},
-        {"name": "Beat: KelseyLConway", "url": "https://rsshub.app/twitter/user/KelseyLConway"},
-        {"name": "Beat: Ben_Baby", "url": "https://rsshub.app/twitter/user/Ben_Baby"},
-        {"name": "Beat: pauldehnerjr", "url": "https://rsshub.app/twitter/user/pauldehnerjr"}
+        "https://www.bengals.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/cin"
       ],
       "Cleveland Browns": [
-        {"name": "Browns Official", "url": "https://www.clevelandbrowns.com/rss/news"},
-        {"name": "Reddit r/Browns", "url": "https://www.reddit.com/r/Browns.rss"},
-        {"name": "Beat: MaryKayCabot", "url": "https://rsshub.app/twitter/user/MaryKayCabot"},
-        {"name": "Beat: AkronJackson", "url": "https://rsshub.app/twitter/user/AkronJackson"}
+        "https://www.clevelandbrowns.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/cle"
       ],
       "Dallas Cowboys": [
-        {"name": "Cowboys Official", "url": "https://www.dallascowboys.com/rss/news"},
-        {"name": "Reddit r/cowboys", "url": "https://www.reddit.com/r/cowboys.rss"},
-        {"name": "Beat: kyle_youmans", "url": "https://rsshub.app/twitter/user/kyle_youmans"},
-        {"name": "Beat: ClarenceHillJr", "url": "https://rsshub.app/twitter/user/ClarenceHillJr"},
-        {"name": "Beat: toddarcher", "url": "https://rsshub.app/twitter/user/toddarcher"},
-        {"name": "Beat: TimCowlishaw", "url": "https://rsshub.app/twitter/user/TimCowlishaw"},
-        {"name": "Beat: DavidMooreDMN", "url": "https://rsshub.app/twitter/user/DavidMooreDMN"},
-        {"name": "Beat: CalvinWatkins", "url": "https://rsshub.app/twitter/user/CalvinWatkins"}
+        "https://www.dallascowboys.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/dal"
       ],
       "Denver Broncos": [
-        {"name": "Broncos Official", "url": "https://www.denverbroncos.com/rss/news"},
-        {"name": "Reddit r/DenverBroncos", "url": "https://www.reddit.com/r/DenverBroncos.rss"},
-        {"name": "Beat: mikeklis", "url": "https://rsshub.app/twitter/user/mikeklis"},
-        {"name": "Beat: TroyRenck", "url": "https://rsshub.app/twitter/user/TroyRenck"},
-        {"name": "Beat: MaseDenver", "url": "https://rsshub.app/twitter/user/MaseDenver"},
-        {"name": "Beat: christomasson", "url": "https://rsshub.app/twitter/user/christomasson"}
+        "https://www.denverbroncos.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/den"
       ],
       "Detroit Lions": [
-        {"name": "Lions Official", "url": "https://www.detroitlions.com/rss/news"},
-        {"name": "Reddit r/detroitlions", "url": "https://www.reddit.com/r/detroitlions.rss"},
-        {"name": "Beat: colton_pouncy", "url": "https://rsshub.app/twitter/user/colton_pouncy"},
-        {"name": "Beat: ttwentyman", "url": "https://rsshub.app/twitter/user/ttwentyman"},
-        {"name": "Beat: davebirkett", "url": "https://rsshub.app/twitter/user/davebirkett"},
-        {"name": "Beat: Justin_Rogers", "url": "https://rsshub.app/twitter/user/Justin_Rogers"}
+        "https://www.detroitlions.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/det"
       ],
       "Green Bay Packers": [
-        {"name": "Packers Official", "url": "https://www.packers.com/rss/news"},
-        {"name": "Reddit r/GreenBayPackers", "url": "https://www.reddit.com/r/GreenBayPackers.rss"},
-        {"name": "Beat: AndyHermanNFL", "url": "https://rsshub.app/twitter/user/AndyHermanNFL"},
-        {"name": "Beat: mattschneidman", "url": "https://rsshub.app/twitter/user/mattschneidman"},
-        {"name": "Beat: TomSilverstein", "url": "https://rsshub.app/twitter/user/TomSilverstein"},
-        {"name": "Beat: RobDemovsky", "url": "https://rsshub.app/twitter/user/RobDemovsky"}
+        "https://www.packers.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/gb"
       ],
       "Houston Texans": [
-        {"name": "Texans Official", "url": "https://www.houstontexans.com/rss/news"},
-        {"name": "Reddit r/Texans", "url": "https://www.reddit.com/r/Texans.rss"},
-        {"name": "Beat: JohnHCrumpler", "url": "https://rsshub.app/twitter/user/JohnHCrumpler"},
-        {"name": "Beat: AaronWilson_NFL", "url": "https://rsshub.app/twitter/user/AaronWilson_NFL"},
-        {"name": "Beat: jonmalexander", "url": "https://rsshub.app/twitter/user/jonmalexander"}
+        "https://www.houstontexans.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/hou"
       ],
       "Indianapolis Colts": [
-        {"name": "Colts Official", "url": "https://www.colts.com/rss/news"},
-        {"name": "Reddit r/Colts", "url": "https://www.reddit.com/r/Colts.rss"},
-        {"name": "Beat: GMbremer", "url": "https://rsshub.app/twitter/user/GMbremer"},
-        {"name": "Beat: mchappell51", "url": "https://rsshub.app/twitter/user/mchappell51"},
-        {"name": "Beat: HolderStephen", "url": "https://rsshub.app/twitter/user/HolderStephen"}
+        "https://www.colts.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/ind"
       ],
       "Jacksonville Jaguars": [
-        {"name": "Jaguars Official", "url": "https://www.jaguars.com/rss/news"},
-        {"name": "Reddit r/Jaguars", "url": "https://www.reddit.com/r/Jaguars.rss"},
-        {"name": "Beat: Demetrius82", "url": "https://rsshub.app/twitter/user/Demetrius82"},
-        {"name": "Beat: _John_Shipley", "url": "https://rsshub.app/twitter/user/_John_Shipley"},
-        {"name": "Beat: HaysCarlyon", "url": "https://rsshub.app/twitter/user/HaysCarlyon"}
+        "https://www.jaguars.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/jax"
       ],
       "Kansas City Chiefs": [
-        {"name": "Chiefs Official", "url": "https://www.chiefs.com/rss/news"},
-        {"name": "Reddit r/KansasCityChiefs", "url": "https://www.reddit.com/r/KansasCityChiefs.rss"},
-        {"name": "Beat: mattderrick", "url": "https://rsshub.app/twitter/user/mattderrick"},
-        {"name": "Beat: ByNateTaylor", "url": "https://rsshub.app/twitter/user/ByNateTaylor"},
-        {"name": "Beat: jessenewell", "url": "https://rsshub.app/twitter/user/jessenewell"},
-        {"name": "Beat: adamteicher", "url": "https://rsshub.app/twitter/user/adamteicher"},
-        {"name": "Beat: EdEastonJr", "url": "https://rsshub.app/twitter/user/EdEastonJr"}
+        "https://www.chiefs.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/kc"
       ],
       "Las Vegas Raiders": [
-        {"name": "Raiders Official", "url": "https://www.raiders.com/rss/news"},
-        {"name": "Reddit r/raiders", "url": "https://www.reddit.com/r/raiders.rss"},
-        {"name": "Beat: VicTafur", "url": "https://rsshub.app/twitter/user/VicTafur"},
-        {"name": "Beat: PGutierrezESPN", "url": "https://rsshub.app/twitter/user/PGutierrezESPN"},
-        {"name": "Beat: tashanreed", "url": "https://rsshub.app/twitter/user/tashanreed"},
-        {"name": "Beat: VinnyBonsignore", "url": "https://rsshub.app/twitter/user/VinnyBonsignore"}
+        "https://www.raiders.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/lv"
       ],
       "Los Angeles Chargers": [
-        {"name": "Chargers Official", "url": "https://www.chargers.com/rss/news"},
-        {"name": "Reddit r/Chargers", "url": "https://www.reddit.com/r/Chargers.rss"},
-        {"name": "Beat: danielrpopper", "url": "https://rsshub.app/twitter/user/danielrpopper"},
-        {"name": "Beat: krisrhim1", "url": "https://rsshub.app/twitter/user/krisrhim1"}
+        "https://www.chargers.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/lac"
       ],
       "Los Angeles Rams": [
-        {"name": "Rams Official", "url": "https://www.therams.com/rss/news"},
-        {"name": "Reddit r/LosAngelesRams", "url": "https://www.reddit.com/r/LosAngelesRams.rss"},
-        {"name": "Beat: JourdanRodrigue", "url": "https://rsshub.app/twitter/user/JourdanRodrigue"},
-        {"name": "Beat: LATimesklein", "url": "https://rsshub.app/twitter/user/LATimesklein"}
+        "https://www.therams.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/lar"
       ],
       "Miami Dolphins": [
-        {"name": "Dolphins Official", "url": "https://www.miamidolphins.com/rss/news"},
-        {"name": "Reddit r/miamidolphins", "url": "https://www.reddit.com/r/miamidolphins.rss"},
-        {"name": "Beat: DavidFurones_", "url": "https://rsshub.app/twitter/user/DavidFurones_"},
-        {"name": "Beat: schadjoe", "url": "https://rsshub.app/twitter/user/schadjoe"}
+        "https://www.miamidolphins.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/mia"
       ],
       "Minnesota Vikings": [
-        {"name": "Vikings Official", "url": "https://www.vikings.com/rss/news"},
-        {"name": "Reddit r/minnesotavikings", "url": "https://www.reddit.com/r/minnesotavikings.rss"},
-        {"name": "Beat: alec_lewis", "url": "https://rsshub.app/twitter/user/alec_lewis"},
-        {"name": "Beat: BenGoessling", "url": "https://rsshub.app/twitter/user/BenGoessling"},
-        {"name": "Beat: ArifHasanNFL", "url": "https://rsshub.app/twitter/user/ArifHasanNFL"},
-        {"name": "Beat: LindseyMNSports", "url": "https://rsshub.app/twitter/user/LindseyMNSports"}
+        "https://www.vikings.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/min"
       ],
       "New England Patriots": [
-        {"name": "Patriots Official", "url": "https://www.patriots.com/rss/news"},
-        {"name": "Reddit r/Patriots", "url": "https://www.reddit.com/r/Patriots.rss"},
-        {"name": "Beat: MikeReiss", "url": "https://rsshub.app/twitter/user/MikeReiss"},
-        {"name": "Beat: ezlazar", "url": "https://rsshub.app/twitter/user/ezlazar"},
-        {"name": "Beat: PhilAPerry", "url": "https://rsshub.app/twitter/user/PhilAPerry"}
+        "https://www.patriots.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/ne"
       ],
       "New Orleans Saints": [
-        {"name": "Saints Official", "url": "https://www.neworleanssaints.com/rss/news"},
-        {"name": "Reddit r/Saints", "url": "https://www.reddit.com/r/Saints.rss"},
-        {"name": "Beat: nick_underhill", "url": "https://rsshub.app/twitter/user/nick_underhill"},
-        {"name": "Beat: MikeTriplett", "url": "https://rsshub.app/twitter/user/MikeTriplett"},
-        {"name": "Beat: Kat_Terrell", "url": "https://rsshub.app/twitter/user/Kat_Terrell"},
-        {"name": "Beat: ByLukeJohnson", "url": "https://rsshub.app/twitter/user/ByLukeJohnson"}
+        "https://www.neworleanssaints.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/no"
       ],
       "New York Giants": [
-        {"name": "Giants Official", "url": "https://www.giants.com/rss/news"},
-        {"name": "Reddit r/NYGiants", "url": "https://www.reddit.com/r/NYGiants.rss"},
-        {"name": "Beat: JordanRaanan", "url": "https://rsshub.app/twitter/user/JordanRaanan"},
-        {"name": "Beat: NYPost_Schwartz", "url": "https://rsshub.app/twitter/user/NYPost_Schwartz"},
-        {"name": "Beat: DDuggan21", "url": "https://rsshub.app/twitter/user/DDuggan21"},
-        {"name": "Beat: rydunleavy", "url": "https://rsshub.app/twitter/user/rydunleavy"}
+        "https://www.giants.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/nyg"
       ],
       "New York Jets": [
-        {"name": "Jets Official", "url": "https://www.newyorkjets.com/rss/news"},
-        {"name": "Reddit r/nyjets", "url": "https://www.reddit.com/r/nyjets.rss"},
-        {"name": "Beat: BrianCoz", "url": "https://rsshub.app/twitter/user/BrianCoz"},
-        {"name": "Beat: RichCimini", "url": "https://rsshub.app/twitter/user/RichCimini"}
+        "https://www.newyorkjets.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/nyj"
       ],
       "Philadelphia Eagles": [
-        {"name": "Eagles Official", "url": "https://www.philadelphiaeagles.com/rss/news"},
-        {"name": "Reddit r/eagles", "url": "https://www.reddit.com/r/eagles.rss"},
-        {"name": "Beat: Jeff_McLane", "url": "https://rsshub.app/twitter/user/Jeff_McLane"},
-        {"name": "Beat: EliotShorrParks", "url": "https://rsshub.app/twitter/user/EliotShorrParks"},
-        {"name": "Beat: ZBerm", "url": "https://rsshub.app/twitter/user/ZBerm"},
-        {"name": "Beat: JimmyKempski", "url": "https://rsshub.app/twitter/user/JimmyKempski"},
-        {"name": "Beat: BKubena", "url": "https://rsshub.app/twitter/user/BKubena"}
+        "https://www.philadelphiaeagles.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/phi"
       ],
       "Pittsburgh Steelers": [
-        {"name": "Steelers Official", "url": "https://www.steelers.com/rss/news"},
-        {"name": "Reddit r/steelers", "url": "https://www.reddit.com/r/steelers.rss"},
-        {"name": "Beat: MarkKaboly", "url": "https://rsshub.app/twitter/user/MarkKaboly"},
-        {"name": "Beat: Alex_Kozora", "url": "https://rsshub.app/twitter/user/Alex_Kozora"},
-        {"name": "Beat: dlolley_pgh", "url": "https://rsshub.app/twitter/user/dlolley_pgh"}
+        "https://www.steelers.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/pit"
       ],
       "San Francisco 49ers": [
-        {"name": "49ers Official", "url": "https://www.49ers.com/rss/news"},
-        {"name": "Reddit r/49ers", "url": "https://www.reddit.com/r/49ers.rss"},
-        {"name": "Beat: LombardiHimself", "url": "https://rsshub.app/twitter/user/LombardiHimself"},
-        {"name": "Beat: Eric_Branch", "url": "https://rsshub.app/twitter/user/Eric_Branch"},
-        {"name": "Beat: CamInman", "url": "https://rsshub.app/twitter/user/CamInman"},
-        {"name": "Beat: VicTafur", "url": "https://rsshub.app/twitter/user/VicTafur"},
-        {"name": "Beat: grantcohn", "url": "https://rsshub.app/twitter/user/grantcohn"}
+        "https://www.49ers.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/sf"
       ],
       "Seattle Seahawks": [
-        {"name": "Seahawks Official", "url": "https://www.seahawks.com/rss/news"},
-        {"name": "Reddit r/Seahawks", "url": "https://www.reddit.com/r/Seahawks.rss"},
-        {"name": "Beat: Gbellseattle", "url": "https://rsshub.app/twitter/user/Gbellseattle"},
-        {"name": "Beat: bcondotta", "url": "https://rsshub.app/twitter/user/bcondotta"},
-        {"name": "Beat: gbellseattle", "url": "https://rsshub.app/twitter/user/gbellseattle"}
+        "https://www.seahawks.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/sea"
       ],
       "Tampa Bay Buccaneers": [
-        {"name": "Buccaneers Official", "url": "https://www.buccaneers.com/rss/news"},
-        {"name": "Reddit r/buccaneers", "url": "https://www.reddit.com/r/buccaneers.rss"},
-        {"name": "Beat: NFLSTROUD", "url": "https://rsshub.app/twitter/user/NFLSTROUD"},
-        {"name": "Beat: GregAuman", "url": "https://rsshub.app/twitter/user/GregAuman"},
-        {"name": "Beat: gregauman", "url": "https://rsshub.app/twitter/user/gregauman"},
-        {"name": "Beat: PewterReport", "url": "https://rsshub.app/twitter/user/PewterReport"}
+        "https://www.buccaneers.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/tb"
       ],
       "Tennessee Titans": [
-        {"name": "Titans Official", "url": "https://www.tennesseetitans.com/rss/news"},
-        {"name": "Reddit r/Tennesseetitans", "url": "https://www.reddit.com/r/Tennesseetitans.rss"},
-        {"name": "Beat: nicksuss", "url": "https://rsshub.app/twitter/user/nicksuss"},
-        {"name": "Beat: terrymc13", "url": "https://rsshub.app/twitter/user/terrymc13"},
-        {"name": "Beat: jwyattsports", "url": "https://rsshub.app/twitter/user/jwyattsports"},
-        {"name": "Beat: TDavenport_NFL", "url": "https://rsshub.app/twitter/user/TDavenport_NFL"}
+        "https://www.titansonline.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/ten"
       ],
       "Washington Commanders": [
-        {"name": "Commanders Official", "url": "https://www.commanders.com/rss/news"},
-        {"name": "Reddit r/Commanders", "url": "https://www.reddit.com/r/Commanders.rss"},
-        {"name": "Beat: BenStandig", "url": "https://rsshub.app/twitter/user/BenStandig"},
-        {"name": "Beat: John_Keim", "url": "https://rsshub.app/twitter/user/John_Keim"},
-        {"name": "Beat: john_keim", "url": "https://rsshub.app/twitter/user/john_keim"}
+        "https://www.commanders.com/feeds/news",
+        "https://www.espn.com/espn/rss/nfl/team/_/name/wsh"
       ]
     }
   }
