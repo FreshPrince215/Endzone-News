@@ -1,6 +1,6 @@
 """
 NFL News Terminal 
-Professional-grade NFL news aggregation
+Professional-grade NFL news aggregation with Player Highlights
 """
 
 import feedparser
@@ -13,6 +13,9 @@ from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import streamlit as st
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse, parse_qs
 
 # =============================================================================
 # CONFIGURATION
@@ -51,6 +54,58 @@ st.set_page_config(
 )
 
 # =============================================================================
+# PLAYER HIGHLIGHTS FETCHER
+# =============================================================================
+
+class PlayerHighlightsFetcher:
+    """Fetch YouTube highlights for NFL players"""
+    
+    @staticmethod
+    @st.cache_data(ttl=3600, show_spinner=False)
+    def search_youtube_highlights(player_name: str) -> List[Dict[str, str]]:
+        """Search for player highlights on YouTube"""
+        query = f"{player_name} NFL highlights 2024 2025 site:youtube.com"
+        url = f"https://www.google.com/search?q={query}"
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        
+        videos = []
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            for link in soup.find_all('a'):
+                href = link.get('href')
+                if href and "youtube.com/watch" in href:
+                    if href.startswith('/url?'):
+                        parsed = parse_qs(urlparse(href).query)
+                        href = parsed.get('q', [None])[0]
+                    
+                    if href:
+                        parsed_url = urlparse(href)
+                        vid_id = parse_qs(parsed_url.query).get('v')
+                        
+                        if vid_id:
+                            # Try to extract title from link text
+                            title = link.get_text().strip()
+                            if not title or len(title) < 10:
+                                title = f"{player_name} Highlights"
+                            
+                            videos.append({
+                                'video_id': vid_id[0],
+                                'title': title[:100],  # Truncate long titles
+                                'url': f"https://www.youtube.com/watch?v={vid_id[0]}"
+                            })
+                            
+                            # Limit to top 5 results
+                            if len(videos) >= 5:
+                                break
+            
+        except Exception as e:
+            st.error(f"Error searching for videos: {e}")
+        
+        return videos
+
+# =============================================================================
 # FEED FETCHER
 # =============================================================================
 
@@ -68,11 +123,8 @@ class FeedFetcher:
         """Remove HTML tags and clean text"""
         if not text:
             return ""
-        # Remove HTML tags
         text = re.sub(r'<[^>]+>', '', text)
-        # Remove extra whitespace
         text = ' '.join(text.split())
-        # Truncate if too long
         if len(text) > 300:
             text = text[:300] + '...'
         return text
@@ -96,7 +148,6 @@ class FeedFetcher:
                 if not title or not link:
                     continue
                 
-                # Parse publication date
                 pub_parsed = entry.get('published_parsed') or entry.get('updated_parsed')
                 if pub_parsed:
                     try:
@@ -169,7 +220,6 @@ class DataProcessor:
         """Extract team name from article title"""
         text_upper = text.upper()
         
-        # Check for team names and common abbreviations
         team_keywords = {
             'CARDINALS': 'Arizona Cardinals',
             'FALCONS': 'Atlanta Falcons',
@@ -210,7 +260,6 @@ class DataProcessor:
             if keyword in text_upper:
                 return team
         
-        # Fallback to full team name check
         for team in teams:
             if team.upper() in text_upper:
                 return team
@@ -227,7 +276,6 @@ def fetch_all_news() -> pd.DataFrame:
     fetcher = FeedFetcher(days_lookback=APP.get('days_lookback', 7))
     news_items = []
     
-    # Fetch general news feeds
     general_feeds = [
         (feed['url'], feed['name']) 
         for feed in RSS_FEEDS.get('general_news', []) 
@@ -248,7 +296,6 @@ def fetch_all_news() -> pd.DataFrame:
                 'summary': article['summary']
             })
     
-    # Fetch team-specific feeds
     team_feeds_dict = RSS_FEEDS.get('team_feeds', {})
     for team, feeds in team_feeds_dict.items():
         if isinstance(feeds, list):
@@ -282,7 +329,6 @@ def apply_bloomberg_css():
     """Apply Bloomberg Terminal inspired CSS"""
     st.markdown("""
     <style>
-        /* Global Dark Theme */
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
         
         :root {
@@ -306,7 +352,6 @@ def apply_bloomberg_css():
             background-color: var(--bg-primary);
         }
         
-        /* Terminal Header */
         .terminal-header {
             background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
             border-bottom: 2px solid var(--accent-orange);
@@ -364,7 +409,6 @@ def apply_bloomberg_css():
             50% { opacity: 0.4; }
         }
         
-        /* Control Panel */
         .control-label {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 10px;
@@ -375,7 +419,6 @@ def apply_bloomberg_css():
             font-weight: 600;
         }
         
-        /* Stats Dashboard */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -407,7 +450,6 @@ def apply_bloomberg_css():
             letter-spacing: 1.5px;
         }
         
-        /* News Feed */
         .news-item {
             background: var(--bg-secondary);
             border-left: 3px solid var(--accent-blue);
@@ -478,7 +520,90 @@ def apply_bloomberg_css():
             margin-top: 8px;
         }
         
-        /* Streamlit Overrides */
+        /* Video Card Styles */
+        .video-card {
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--accent-blue);
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.2s ease;
+        }
+        
+        .video-card:hover {
+            background: var(--bg-tertiary);
+            border-left-color: var(--accent-orange);
+            transform: translateX(3px);
+        }
+        
+        .video-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .player-search-box {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--accent-orange);
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 0;
+        }
+        
+        .search-header {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--accent-orange);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
+            background-color: var(--bg-secondary);
+            padding: 10px;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            padding: 12px 24px;
+        }
+        
+        .stTabs [aria-selected="true"] {
+            background-color: var(--accent-orange);
+            color: #000;
+            border-color: var(--accent-orange);
+        }
+        
+        .stTextInput > div > div > input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            color: var(--text-primary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+        }
+        
+        .stTextInput label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        
         .stSelectbox > div > div {
             background: var(--bg-tertiary);
             border: 1px solid var(--border-color);
@@ -515,7 +640,6 @@ def apply_bloomberg_css():
             color: #000;
         }
         
-        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 10px;
         }
@@ -533,13 +657,11 @@ def apply_bloomberg_css():
             background: #ff9d1f;
         }
         
-        /* Hide Streamlit elements */
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
         .stDeployButton {display: none;}
         
-        /* Section Headers */
         .section-header {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 13px;
@@ -563,7 +685,7 @@ def render_terminal_header():
         <div class="terminal-logo">
             <div>
                 <div class="terminal-title">🏈 NFL TERMINAL</div>
-                <div class="terminal-subtitle">Real-Time News Aggregation System</div>
+                <div class="terminal-subtitle">Real-Time News & Player Highlights</div>
             </div>
         </div>
         <div>
@@ -626,32 +748,77 @@ def render_news_item(row: pd.Series):
     </div>
     """, unsafe_allow_html=True)
 
-def get_time_ago(date: datetime) -> str:
-    """Get human-readable time ago string"""
-    now = datetime.now()
-    diff = now - date
-    
-    if diff.days > 0:
-        return f"{diff.days}d ago"
-    elif diff.seconds >= 3600:
-        hours = diff.seconds // 3600
-        return f"{hours}h ago"
-    elif diff.seconds >= 60:
-        minutes = diff.seconds // 60
-        return f"{minutes}m ago"
-    else:
-        return "just now"
-
 # =============================================================================
-# MAIN APPLICATION
+# PLAYER TAB
 # =============================================================================
 
-def main():
-    """Main application"""
-    apply_bloomberg_css()
-    render_terminal_header()
+def render_player_tab():
+    """Render Player Highlights tab"""
+    st.markdown('<div class="player-search-box">', unsafe_allow_html=True)
+    st.markdown('<div class="search-header">🎬 PLAYER HIGHLIGHTS SEARCH</div>', unsafe_allow_html=True)
     
-    # Control Panel
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        player_name = st.text_input(
+            "ENTER PLAYER NAME",
+            placeholder="e.g., Patrick Mahomes, CeeDee Lamb, Christian McCaffrey",
+            key="player_search"
+        )
+    
+    with col2:
+        search_button = st.button("🔍 SEARCH", use_container_width=True, type="primary")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Popular players quick access
+    st.markdown('<div class="section-header">⚡ QUICK ACCESS — POPULAR PLAYERS</div>', unsafe_allow_html=True)
+    
+    popular_players = [
+        "Patrick Mahomes", "Josh Allen", "Lamar Jackson", "Jalen Hurts",
+        "Christian McCaffrey", "Tyreek Hill", "Travis Kelce", "Justin Jefferson",
+        "CeeDee Lamb", "Saquon Barkley", "Derrick Henry", "Brock Purdy"
+    ]
+    
+    cols = st.columns(4)
+    for idx, player in enumerate(popular_players):
+        with cols[idx % 4]:
+            if st.button(player, key=f"quick_{idx}", use_container_width=True):
+                st.session_state.player_search = player
+                st.rerun()
+    
+    # Search and display videos
+    if search_button or (player_name and len(player_name) > 2):
+        search_name = player_name or st.session_state.get('player_search', '')
+        
+        if search_name:
+            with st.spinner(f'🔍 Searching for {search_name} highlights...'):
+                videos = PlayerHighlightsFetcher.search_youtube_highlights(search_name)
+            
+            if videos:
+                st.markdown(f'<div class="section-header">📺 HIGHLIGHTS — {search_name.upper()} ({len(videos)} VIDEOS)</div>', unsafe_allow_html=True)
+                
+                for video in videos:
+                    st.markdown(f"""
+                    <div class="video-card">
+                        <div class="video-title">▶️ {video['title']}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Embed YouTube video
+                    st.video(video['url'])
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+            else:
+                st.warning(f"⚠️ NO VIDEOS FOUND | {search_name}")
+                st.info("💡 Try adjusting the player name or check spelling. Make sure to use the full name.")
+
+# =============================================================================
+# NEWS TAB
+# =============================================================================
+
+def render_news_tab():
+    """Render News Feed tab"""
     col1, col2, col3 = st.columns([3, 2, 1])
     
     with col1:
@@ -686,7 +853,7 @@ def main():
             st.rerun()
     
     # Load data
-    with st.spinner('■ LOADING FEED DATA...'):
+    with st.spinner('▮ LOADING FEED DATA...'):
         df = fetch_all_news()
     
     if df.empty:
@@ -716,6 +883,24 @@ def main():
     else:
         st.info(f"⚠ NO ARTICLES FOUND | {selected_team} | {selected_time}")
         st.caption("Try adjusting the time range or selecting a different team.")
+
+# =============================================================================
+# MAIN APPLICATION
+# =============================================================================
+
+def main():
+    """Main application"""
+    apply_bloomberg_css()
+    render_terminal_header()
+    
+    # Create tabs
+    tab1, tab2 = st.tabs(["📰 NEWS FEED", "🎬 PLAYER TAP"])
+    
+    with tab1:
+        render_news_tab()
+    
+    with tab2:
+        render_player_tab()
 
 if __name__ == "__main__":
     main()
