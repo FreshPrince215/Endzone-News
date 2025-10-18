@@ -24,7 +24,6 @@
       {"name": "NBC Sports", "url": "https://www.nbcsports.com/nfl.atom", "enabled": true},
       {"name": "Fox Sports", "url": "https://api.foxsports.com/v1/rss?partnerKey=zBaFxRyGKCfxBagJG9b8pqLyndmvo7UU&tag=nfl", "enabled": true},
       {"name": "Yahoo Sports", "url": "https://sports.yahoo.com/nfl/rss.xml", "enabled": true},
-      {"name": "Bleacher Report", "url": "https://bleacherreport.com/articles/feed?tag_id=18", "enabled": true},
       {"name": "Pro Football Talk", "url": "https://profootballtalk.nbcsports.com/feed/", "enabled": true},
       {"name": "The Athletic", "url": "https://www.nytimes.com/athletic/rss/nfl/", "enabled": true},
       {"name": "SI NFL", "url": "https://www.si.com/rss/si_nfl.rss", "enabled": true},
