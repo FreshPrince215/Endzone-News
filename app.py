@@ -1,16 +1,16 @@
 """
-EndzoneHubV1 
-real-time news aggregation
+NFL News Terminal - Bloomberg Style (Production Ready)
+Professional-grade NFL news aggregation with robust error handling
 """
 
 import feedparser
 import pandas as pd
 import json
 import hashlib
-import requests
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import streamlit as st
 
@@ -24,14 +24,14 @@ def load_config() -> Dict:
     config_path = Path(__file__).parent / 'config.json'
     
     if not config_path.exists():
-        st.error("⚠️ config.json not found")
+        st.error("⚠️ config.json not found. Please create config.json in the same directory.")
         st.stop()
     
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
-        st.error(f"❌ Error loading config: {e}")
+        st.error(f"❌ Error loading config.json: {e}")
         st.stop()
 
 CONFIG = load_config()
@@ -44,7 +44,7 @@ RSS_FEEDS = CONFIG.get('rss_feeds', {})
 # =============================================================================
 
 st.set_page_config(
-    page_title=APP.get('title', 'NFL News Hub'),
+    page_title=APP.get('title', 'NFL News Terminal'),
     page_icon=APP.get('page_icon', '🏈'),
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -55,19 +55,40 @@ st.set_page_config(
 # =============================================================================
 
 class FeedFetcher:
-    """RSS feed fetching with parallel processing"""
+    """RSS feed fetching with robust error handling"""
     
-    def __init__(self, days_lookback: int = 7, max_entries: int = 50):
+    def __init__(self, days_lookback: int = 7, max_entries: int = 100):
         self.days_lookback = days_lookback
         self.max_entries = max_entries
         self.cutoff_date = datetime.now() - timedelta(days=days_lookback)
+        self.success_count = 0
+        self.error_count = 0
+    
+    def clean_html(self, text: str) -> str:
+        """Remove HTML tags and clean text"""
+        if not text:
+            return ""
+        # Remove HTML tags
+        text = re.sub(r'<[^>]+>', '', text)
+        # Remove extra whitespace
+        text = ' '.join(text.split())
+        # Truncate if too long
+        if len(text) > 300:
+            text = text[:300] + '...'
+        return text
     
     def fetch_single_feed(self, url: str, source_name: str = "") -> List[Dict]:
-        """Fetch a single RSS feed"""
+        """Fetch a single RSS feed with error handling"""
         try:
-            feed = feedparser.parse(url)
-            articles = []
+            feed = feedparser.parse(url, request_headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            })
             
+            if not feed.entries:
+                self.error_count += 1
+                return []
+            
+            articles = []
             for entry in feed.entries[:self.max_entries]:
                 title = entry.get('title', '').strip()
                 link = entry.get('link', '')
@@ -75,17 +96,19 @@ class FeedFetcher:
                 if not title or not link:
                     continue
                 
+                # Parse publication date
                 pub_parsed = entry.get('published_parsed') or entry.get('updated_parsed')
-                pub_date = datetime(*pub_parsed[:6]) if pub_parsed else datetime.now()
+                if pub_parsed:
+                    try:
+                        pub_date = datetime(*pub_parsed[:6])
+                    except:
+                        pub_date = datetime.now()
+                else:
+                    pub_date = datetime.now()
                 
                 if pub_date >= self.cutoff_date:
                     summary = entry.get('summary', entry.get('description', ''))
-                    
-                    # Clean summary
-                    if summary:
-                        summary = summary.replace('<p>', '').replace('</p>', '')
-                        summary = summary.replace('<br>', ' ').replace('<br/>', ' ')
-                        summary = summary[:200] + '...' if len(summary) > 200 else summary
+                    summary = self.clean_html(summary)
                     
                     articles.append({
                         'title': title,
@@ -95,8 +118,11 @@ class FeedFetcher:
                         'summary': summary
                     })
             
+            self.success_count += 1
             return articles
-        except:
+            
+        except Exception as e:
+            self.error_count += 1
             return []
     
     def fetch_multiple_feeds(self, feeds: List[Tuple[str, str]], max_workers: int = 10) -> List[Dict]:
@@ -104,7 +130,8 @@ class FeedFetcher:
         articles = []
         
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = {executor.submit(self.fetch_single_feed, url, name): (url, name) for url, name in feeds}
+            futures = {executor.submit(self.fetch_single_feed, url, name): (url, name) 
+                      for url, name in feeds}
             
             for future in as_completed(futures):
                 try:
@@ -123,12 +150,12 @@ class DataProcessor:
     
     @staticmethod
     def create_hash(text: str) -> str:
-        """Create MD5 hash"""
+        """Create MD5 hash for deduplication"""
         return hashlib.md5(text.encode()).hexdigest()
     
     @staticmethod
     def deduplicate_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-        """Remove duplicates"""
+        """Remove duplicate articles"""
         if df.empty:
             return df
         
@@ -139,11 +166,55 @@ class DataProcessor:
     
     @staticmethod
     def extract_team_from_title(text: str, teams: List[str]) -> str:
-        """Extract team name from text"""
+        """Extract team name from article title"""
         text_upper = text.upper()
+        
+        # Check for team names and common abbreviations
+        team_keywords = {
+            'CARDINALS': 'Arizona Cardinals',
+            'FALCONS': 'Atlanta Falcons',
+            'RAVENS': 'Baltimore Ravens',
+            'BILLS': 'Buffalo Bills',
+            'PANTHERS': 'Carolina Panthers',
+            'BEARS': 'Chicago Bears',
+            'BENGALS': 'Cincinnati Bengals',
+            'BROWNS': 'Cleveland Browns',
+            'COWBOYS': 'Dallas Cowboys',
+            'BRONCOS': 'Denver Broncos',
+            'LIONS': 'Detroit Lions',
+            'PACKERS': 'Green Bay Packers',
+            'TEXANS': 'Houston Texans',
+            'COLTS': 'Indianapolis Colts',
+            'JAGUARS': 'Jacksonville Jaguars',
+            'CHIEFS': 'Kansas City Chiefs',
+            'RAIDERS': 'Las Vegas Raiders',
+            'CHARGERS': 'Los Angeles Chargers',
+            'RAMS': 'Los Angeles Rams',
+            'DOLPHINS': 'Miami Dolphins',
+            'VIKINGS': 'Minnesota Vikings',
+            'PATRIOTS': 'New England Patriots',
+            'SAINTS': 'New Orleans Saints',
+            'GIANTS': 'New York Giants',
+            'JETS': 'New York Jets',
+            'EAGLES': 'Philadelphia Eagles',
+            'STEELERS': 'Pittsburgh Steelers',
+            '49ERS': 'San Francisco 49ers',
+            'SEAHAWKS': 'Seattle Seahawks',
+            'BUCCANEERS': 'Tampa Bay Buccaneers',
+            'BUCS': 'Tampa Bay Buccaneers',
+            'TITANS': 'Tennessee Titans',
+            'COMMANDERS': 'Washington Commanders'
+        }
+        
+        for keyword, team in team_keywords.items():
+            if keyword in text_upper:
+                return team
+        
+        # Fallback to full team name check
         for team in teams:
             if team.upper() in text_upper:
                 return team
+        
         return 'NFL General'
 
 # =============================================================================
@@ -152,32 +223,22 @@ class DataProcessor:
 
 @st.cache_data(ttl=APP.get('cache_ttl', 1800), show_spinner=False)
 def fetch_all_news() -> pd.DataFrame:
-    """Fetch all news from configured sources"""
+    """Fetch all news from configured RSS feeds"""
     fetcher = FeedFetcher(days_lookback=APP.get('days_lookback', 7))
     news_items = []
     
-    # Fetch general news
-    general_feeds = [(f['url'], f['name']) for f in RSS_FEEDS.get('general_news', []) if f.get('enabled', True)]
-    articles = fetcher.fetch_multiple_feeds(general_feeds, max_workers=APP.get('max_workers', 15))
+    # Fetch general news feeds
+    general_feeds = [
+        (feed['url'], feed['name']) 
+        for feed in RSS_FEEDS.get('general_news', []) 
+        if feed.get('enabled', True)
+    ]
     
-    for article in articles:
-        team = DataProcessor.extract_team_from_title(article['title'], TEAMS)
-        news_items.append({
-            'team': team,
-            'headline': article['title'],
-            'link': article['link'],
-            'date': article['published'],
-            'source': article['source'],
-            'summary': article['summary']
-        })
-    
-    # Fetch team-specific feeds
-    team_feeds_dict = RSS_FEEDS.get('team_feeds', {})
-    for team, feeds in team_feeds_dict.items():
-        team_feed_list = [(f['url'], f['name']) for f in feeds]
-        articles = fetcher.fetch_multiple_feeds(team_feed_list, max_workers=APP.get('max_workers', 15))
+    if general_feeds:
+        articles = fetcher.fetch_multiple_feeds(general_feeds, max_workers=APP.get('max_workers', 10))
         
         for article in articles:
+            team = DataProcessor.extract_team_from_title(article['title'], TEAMS)
             news_items.append({
                 'team': team,
                 'headline': article['title'],
@@ -186,6 +247,23 @@ def fetch_all_news() -> pd.DataFrame:
                 'source': article['source'],
                 'summary': article['summary']
             })
+    
+    # Fetch team-specific feeds
+    team_feeds_dict = RSS_FEEDS.get('team_feeds', {})
+    for team, feeds in team_feeds_dict.items():
+        if isinstance(feeds, list):
+            team_feed_list = [(url, team) for url in feeds if url]
+            articles = fetcher.fetch_multiple_feeds(team_feed_list, max_workers=APP.get('max_workers', 10))
+            
+            for article in articles:
+                news_items.append({
+                    'team': team,
+                    'headline': article['title'],
+                    'link': article['link'],
+                    'date': article['published'],
+                    'source': article['source'],
+                    'summary': article['summary']
+                })
     
     if not news_items:
         return pd.DataFrame()
@@ -287,14 +365,6 @@ def apply_bloomberg_css():
         }
         
         /* Control Panel */
-        .control-panel {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 0;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-        
         .control-label {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 10px;
@@ -344,7 +414,6 @@ def apply_bloomberg_css():
             padding: 18px 20px;
             margin-bottom: 12px;
             transition: all 0.2s ease;
-            position: relative;
         }
         
         .news-item:hover {
@@ -358,6 +427,7 @@ def apply_bloomberg_css():
             align-items: center;
             gap: 12px;
             margin-bottom: 10px;
+            flex-wrap: wrap;
         }
         
         .news-timestamp {
@@ -406,41 +476,6 @@ def apply_bloomberg_css():
             color: var(--text-secondary);
             line-height: 1.6;
             margin-top: 8px;
-        }
-        
-        /* Team Grid */
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-        
-        .team-button {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 12px;
-            text-align: center;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .team-button:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--accent-orange);
-            color: var(--accent-orange);
-        }
-        
-        .team-button.active {
-            background: var(--accent-orange);
-            border-color: var(--accent-orange);
-            color: #000;
         }
         
         /* Streamlit Overrides */
@@ -528,7 +563,7 @@ def render_terminal_header():
         <div class="terminal-logo">
             <div>
                 <div class="terminal-title">🏈 NFL TERMINAL</div>
-                <div class="terminal-subtitle">Professional News Aggregation System</div>
+                <div class="terminal-subtitle">Real-Time News Aggregation System</div>
             </div>
         </div>
         <div>
@@ -573,7 +608,6 @@ def render_stats_dashboard(df: pd.DataFrame):
 
 def render_news_item(row: pd.Series):
     """Render individual news item"""
-    time_ago = get_time_ago(row['date'])
     timestamp = row['date'].strftime('%H:%M')
     
     summary_html = f"<div class='news-summary'>{row['summary']}</div>" if row['summary'] else ""
@@ -652,11 +686,12 @@ def main():
             st.rerun()
     
     # Load data
-    with st.spinner('■ LOADING MARKET DATA...'):
+    with st.spinner('■ LOADING FEED DATA...'):
         df = fetch_all_news()
     
     if df.empty:
         st.warning("⚠ NO DATA AVAILABLE | CHECK FEED SOURCES")
+        st.info("Verify that RSS feeds in config.json are accessible and enabled.")
         return
     
     # Filter by team
@@ -680,6 +715,7 @@ def main():
             render_news_item(row)
     else:
         st.info(f"⚠ NO ARTICLES FOUND | {selected_team} | {selected_time}")
+        st.caption("Try adjusting the time range or selecting a different team.")
 
 if __name__ == "__main__":
     main()
