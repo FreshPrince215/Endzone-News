@@ -132,7 +132,7 @@ class DataProcessor:
         if df.empty:
             return df
         
-        df['hash'] = df['title'].apply(DataProcessor.create_hash)
+        df['hash'] = df['headline'].apply(DataProcessor.create_hash)
         df = df.drop_duplicates(subset=['hash']).drop(columns=['hash'])
         
         return df
