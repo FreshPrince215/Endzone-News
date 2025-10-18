@@ -1,39 +1,95 @@
 {
+  "app": {
+    "title": "NFL News Terminal",
+    "page_icon": "🏈",
+    "cache_ttl": 1800,
+    "days_lookback": 7,
+    "max_workers": 10
+  },
+  "teams": [
+    "Arizona Cardinals",
+    "Atlanta Falcons",
+    "Baltimore Ravens",
+    "Buffalo Bills",
+    "Carolina Panthers",
+    "Chicago Bears",
+    "Cincinnati Bengals",
+    "Cleveland Browns",
+    "Dallas Cowboys",
+    "Denver Broncos",
+    "Detroit Lions",
+    "Green Bay Packers",
+    "Houston Texans",
+    "Indianapolis Colts",
+    "Jacksonville Jaguars",
+    "Kansas City Chiefs",
+    "Las Vegas Raiders",
+    "Los Angeles Chargers",
+    "Los Angeles Rams",
+    "Miami Dolphins",
+    "Minnesota Vikings",
+    "New England Patriots",
+    "New Orleans Saints",
+    "New York Giants",
+    "New York Jets",
+    "Philadelphia Eagles",
+    "Pittsburgh Steelers",
+    "San Francisco 49ers",
+    "Seattle Seahawks",
+    "Tampa Bay Buccaneers",
+    "Tennessee Titans",
+    "Washington Commanders"
+  ],
   "rss_feeds": {
     "general_news": [
       {
-        "url": "https://www.espn.com/espn/rss/nfl/news",
         "name": "ESPN NFL",
+        "url": "https://www.espn.com/espn/rss/nfl/news",
         "enabled": true
       },
       {
-        "url": "https://www.nfl.com/feeds/rss",
         "name": "NFL Official",
+        "url": "https://www.nfl.com/feeds/rss",
         "enabled": true
       },
       {
-        "url": "https://www.nbcsports.com/profootballtalk.rss",
         "name": "NBC PFT",
+        "url": "https://profootballtalk.nbcsports.com/feed/",
         "enabled": true
       },
       {
-        "url": "https://www.nbcsports.com/edge/rss/football/nfl/player-news",
         "name": "NBC Edge NFL",
+        "url": "https://www.nbcsports.com/edge/rss/football/nfl/player-news",
         "enabled": true
       },
       {
-        "url": "https://sports.yahoo.com/nfl/rss/",
         "name": "Yahoo NFL",
+        "url": "https://sports.yahoo.com/nfl/rss/",
         "enabled": true
       },
       {
-        "url": "https://api.foxsports.com/v2/content/optimized-rss?partnerKey=MB0Wehpmuj2lUhuRhQaafhBjAJqaPU244mlTDK1i&size=30&tags=fs/nfl",
         "name": "Fox Sports NFL",
+        "url": "https://api.foxsports.com/v2/content/optimized-rss?partnerKey=MB0Wehpmuj2lUhuRhQaafhBjAJqaPU244mlTDK1i&size=30&tags=fs/nfl",
         "enabled": true
       },
       {
-        "url": "https://www.nytimes.com/athletic/rss/nfl/",
         "name": "NYT Athletic NFL",
+        "url": "https://www.nytimes.com/athletic/rss/nfl/",
+        "enabled": true
+      },
+      {
+        "name": "CBS Sports NFL",
+        "url": "https://www.cbssports.com/rss/headlines/nfl/",
+        "enabled": true
+      },
+      {
+        "name": "Bleacher Report NFL",
+        "url": "https://bleacherreport.com/articles/feed?tag_id=16",
+        "enabled": true
+      },
+      {
+        "name": "USA Today NFL",
+        "url": "https://www.usatoday.com/sports/nfl/rss/",
         "enabled": true
       }
     ],
