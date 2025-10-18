@@ -1,11 +1,8 @@
 {
   "rss_feeds": {
     "general_news": [
-      "https://www.espn.com/espn/rss/nfl/news",
       "https://www.nfl.com/feeds/rss",
-      "https://www.pff.com/feed",
-      "https://www.profootballnetwork.com/feed/",
-      "https://nfldraftdiamonds.com/feed/"
+ "
     ],
     "team_feeds": {
       "Arizona Cardinals": [
