@@ -1,6 +1,6 @@
 """
-NFL News Terminal - Bloomberg Style (Production Ready)
-Professional-grade NFL news aggregation with robust error handling
+NFL News Terminal 
+Professional-grade NFL news aggregation
 """
 
 import feedparser
