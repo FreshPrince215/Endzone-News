@@ -1,286 +1,384 @@
 {
   "app": {
-    "title": "NFL News Hub",
+    "title": "EndzoneHubv1",
     "page_icon": "🏈",
     "cache_ttl": 1800,
-    "max_workers": 15,
-    "days_lookback": 7
+    "days_lookback": 7,
+    "max_workers": 15
   },
   "teams": [
-    "Arizona Cardinals", "Atlanta Falcons", "Baltimore Ravens", "Buffalo Bills",
-    "Carolina Panthers", "Chicago Bears", "Cincinnati Bengals", "Cleveland Browns",
-    "Dallas Cowboys", "Denver Broncos", "Detroit Lions", "Green Bay Packers",
-    "Houston Texans", "Indianapolis Colts", "Jacksonville Jaguars", "Kansas City Chiefs",
-    "Las Vegas Raiders", "Los Angeles Chargers", "Los Angeles Rams", "Miami Dolphins",
-    "Minnesota Vikings", "New England Patriots", "New Orleans Saints", "New York Giants",
-    "New York Jets", "Philadelphia Eagles", "Pittsburgh Steelers", "San Francisco 49ers",
-    "Seattle Seahawks", "Tampa Bay Buccaneers", "Tennessee Titans", "Washington Commanders"
+    "Arizona Cardinals",
+    "Atlanta Falcons",
+    "Baltimore Ravens",
+    "Buffalo Bills",
+    "Carolina Panthers",
+    "Chicago Bears",
+    "Cincinnati Bengals",
+    "Cleveland Browns",
+    "Dallas Cowboys",
+    "Denver Broncos",
+    "Detroit Lions",
+    "Green Bay Packers",
+    "Houston Texans",
+    "Indianapolis Colts",
+    "Jacksonville Jaguars",
+    "Kansas City Chiefs",
+    "Las Vegas Raiders",
+    "Los Angeles Chargers",
+    "Los Angeles Rams",
+    "Miami Dolphins",
+    "Minnesota Vikings",
+    "New England Patriots",
+    "New Orleans Saints",
+    "New York Giants",
+    "New York Jets",
+    "Philadelphia Eagles",
+    "Pittsburgh Steelers",
+    "San Francisco 49ers",
+    "Seattle Seahawks",
+    "Tampa Bay Buccaneers",
+    "Tennessee Titans",
+    "Washington Commanders"
   ],
   "rss_feeds": {
     "general_news": [
-      {"name": "NFL Official", "url": "https://www.nfl.com/feeds/rss/home", "enabled": true},
-      {"name": "ESPN NFL", "url": "https://www.espn.com/espn/rss/nfl/news", "enabled": true},
-      {"name": "CBS Sports", "url": "https://www.cbssports.com/rss/headlines/nfl/", "enabled": true},
-      {"name": "NBC Sports", "url": "https://www.nbcsports.com/nfl.atom", "enabled": true},
-      {"name": "Fox Sports", "url": "https://api.foxsports.com/v1/rss?partnerKey=zBaFxRyGKCfxBagJG9b8pqLyndmvo7UU&tag=nfl", "enabled": true},
-      {"name": "Yahoo Sports", "url": "https://sports.yahoo.com/nfl/rss.xml", "enabled": true},
-      {"name": "Pro Football Talk", "url": "https://profootballtalk.nbcsports.com/feed/", "enabled": true},
-      {"name": "The Athletic", "url": "https://www.nytimes.com/athletic/rss/nfl/", "enabled": true},
-      {"name": "SI NFL", "url": "https://www.si.com/rss/si_nfl.rss", "enabled": true},
-      {"name": "USA Today NFL", "url": "http://rssfeeds.usatoday.com/UsatodaycomNfl-TopStories", "enabled": true},
-      {"name": "Washington Post NFL", "url": "https://feeds.washingtonpost.com/rss/rss_football-insider", "enabled": true},
-      {"name": "LA Times NFL", "url": "https://www.latimes.com/sports/nfl/rss2.0.xml", "enabled": true},
-      {"name": "NY Times NFL", "url": "https://rss.nytimes.com/services/xml/rss/nyt/ProFootball.xml", "enabled": true},
-      {"name": "Boston Globe NFL", "url": "https://www.bostonglobe.com/sports/football/?arc404=true", "enabled": true},
-      {"name": "ClutchPoints NFL", "url": "https://clutchpoints.com/nfl/feed", "enabled": true},
-      {"name": "Yardbarker", "url": "https://www.yardbarker.com/rss/sport_merged/2", "enabled": true},
-      {"name": "Pro Football Network", "url": "https://www.profootballnetwork.com/feed/", "enabled": true},
-      {"name": "Gridiron Experts", "url": "https://gridironexperts.com/feed/", "enabled": true},
-      {"name": "NFL Draft Diamonds", "url": "https://nfldraftdiamonds.com/feed/", "enabled": true},
-      {"name": "The Cold Wire", "url": "https://www.thecoldwire.com/sports/nfl/feed/", "enabled": true},
-      {"name": "Athlon Sports", "url": "https://athlonsports.com/.rss/feed/99d9ddce-9758-498f-8961-bd110c2d720f.xml", "enabled": true},
-      {"name": "247Sports", "url": "https://247sports.com/LongFormArticle/rss", "enabled": true},
-      {"name": "SB Nation NFL", "url": "https://www.sbnation.com/rss/nfl/", "enabled": true},
-      {"name": "Fansided NFL", "url": "https://fansided.com/nfl/feed/", "enabled": true}
+      {
+        "name": "ESPN NFL",
+        "url": "https://www.espn.com/espn/rss/nfl/news",
+        "enabled": true
+      },
+      {
+        "name": "Yahoo Sports NFL",
+        "url": "https://sports.yahoo.com/nfl/rss/",
+        "enabled": true
+      },
+      {
+        "name": "FOX Sports NFL",
+        "url": "https://api.foxsports.com/v1/rss?partnerKey=zBaFxRyGKCfxBagJG9b8pqLyndmvo7UU&tag=nfl",
+        "enabled": true
+      },
+      {
+        "name": "NFL.com",
+        "url": "https://www.nfl.com/rss/rss.xml",
+        "enabled": true
+      },
+      {
+        "name": "CBS Sports NFL",
+        "url": "https://www.cbssports.com/rss/headlines/nfl/",
+        "enabled": true
+      },
+      {
+        "name": "Sports Illustrated NFL",
+        "url": "https://www.si.com/rss/si_nfl.rss",
+        "enabled": true
+      },
+      {
+        "name": "Pro Football Talk",
+        "url": "https://profootballtalk.nbcsports.com/feed/",
+        "enabled": true
+      },
+      {
+        "name": "Reddit NFL",
+        "url": "https://www.reddit.com/r/nfl.rss",
+        "enabled": true
+      },
+      {
+        "name": "Reddit CFB",
+        "url": "https://www.reddit.com/r/CFB.rss",
+        "enabled": true
+      },
+      {
+        "name": "Bleacher Report NFL",
+        "url": "https://syndication.bleacherreport.com/amp/nfl.xml",
+        "enabled": true
+      },
+      {
+        "name": "RotoWire NFL",
+        "url": "https://www.rotowire.com/rss/news.php?sport=NFL",
+        "enabled": true
+      },
+      {
+        "name": "Yardbarker NFL",
+        "url": "https://www.yardbarker.com/rss/sport_merged/2",
+        "enabled": true
+      },
+      {
+        "name": "Pro Football Network",
+        "url": "https://www.profootballnetwork.com/feed/",
+        "enabled": true
+      },
+      {
+        "name": "BBC Sport NFL",
+        "url": "https://feeds.bbci.co.uk/sport/american-football/rss.xml",
+        "enabled": true
+      },
+      {
+        "name": "ClutchPoints NFL",
+        "url": "https://clutchpoints.com/nfl/feed",
+        "enabled": true
+      },
+      {
+        "name": "NBC Sports NFL",
+        "url": "https://www.nbcsports.com/nfl.atom",
+        "enabled": true
+      },
+      {
+        "name": "Heavy NFL",
+        "url": "https://heavy.com/sports/nfl/feed/",
+        "enabled": true
+      },
+      {
+        "name": "Larry Brown Sports NFL",
+        "url": "https://larrybrownsports.com/category/football/feed",
+        "enabled": true
+      }
     ],
     "team_feeds": {
       "Arizona Cardinals": [
         "https://www.azcardinals.com/rss/news",
-        "https://www.reddit.com/r/AZCardinals/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=ARI",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=ari",
-        "https://www.azsports.com/category/arizona-cardinals/feed/",
-        "https://www.azcentral.com/sports/nfl/cardinals/?format=rss"
+        "https://www.reddit.com/r/AZCardinals.rss",
+        "https://rsshub.app/twitter/user/Cardschatter",
+        "https://rsshub.app/twitter/user/azbobbymac",
+        "https://rsshub.app/twitter/user/BoBrack",
+        "https://rsshub.app/twitter/user/JohnnyVenerable",
+        "https://rsshub.app/twitter/user/CraigAZSports"
       ],
       "Atlanta Falcons": [
-        "https://www.atlantafalcons.com/rss/article",
-        "https://www.reddit.com/r/falcons/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=ATL",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=atl",
-        "https://www.thefalcoholic.com/rss/current",
-        "https://atlantafalcons.blog/feed/"
+        "https://www.atlantafalcons.com/rss/news",
+        "https://www.reddit.com/r/falcons.rss",
+        "https://rsshub.app/twitter/user/DOrlandoLED",
+        "https://rsshub.app/twitter/user/Tori_McElhaney",
+        "https://rsshub.app/twitter/user/marcraimondi",
+        "https://rsshub.app/twitter/user/ZachKleinWSB",
+        "https://rsshub.app/twitter/user/DOrlandoAJC"
       ],
       "Baltimore Ravens": [
         "https://www.baltimoreravens.com/rss/news",
-        "https://www.reddit.com/r/ravens/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=BAL",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=bal",
-        "https://russellstreetreport.com/feed/",
-        "https://www.baltimorebeatdown.com/rss/current"
+        "https://www.reddit.com/r/ravens.rss",
+        "https://rsshub.app/twitter/user/jamisonhensley",
+        "https://rsshub.app/twitter/user/jeffzrebiec",
+        "https://rsshub.app/twitter/user/jonas_shaffer"
       ],
       "Buffalo Bills": [
-        "https://www.buffalobills.com/rss/article",
-        "https://www.reddit.com/r/buffalobills/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=BUF",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=buf",
-        "https://www.buffalorumblings.com/rss/current"
+        "https://www.buffalobills.com/rss/news",
+        "https://www.reddit.com/r/buffalobills.rss",
+        "https://rsshub.app/twitter/user/SalMaiorana",
+        "https://rsshub.app/twitter/user/SalSports",
+        "https://rsshub.app/twitter/user/JoeBuscaglia",
+        "https://rsshub.app/twitter/user/MattParrino",
+        "https://rsshub.app/twitter/user/JaySkurski"
       ],
       "Carolina Panthers": [
         "https://www.panthers.com/rss/news",
-        "https://www.reddit.com/r/panthers/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CAR",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=car",
-        "https://www.catscratchreader.com/rss/current"
+        "https://www.reddit.com/r/panthers.rss",
+        "https://rsshub.app/twitter/user/JosephPerson",
+        "https://rsshub.app/twitter/user/DarinGantt",
+        "https://rsshub.app/twitter/user/Sheena_Marie3",
+        "https://rsshub.app/twitter/user/josephperson"
       ],
       "Chicago Bears": [
         "https://www.chicagobears.com/rss/news",
-        "https://www.reddit.com/r/CHIBears/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CHI",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=chi",
-        "https://www.dabearsblog.com/feed",
-        "https://www.windycitygridiron.com/rss/current"
+        "https://www.reddit.com/r/CHIBears.rss",
+        "https://rsshub.app/twitter/user/BradBiggs",
+        "https://rsshub.app/twitter/user/kfishbain",
+        "https://rsshub.app/twitter/user/adamjahns",
+        "https://rsshub.app/twitter/user/danwiederer"
       ],
       "Cincinnati Bengals": [
         "https://www.bengals.com/rss/news",
-        "https://www.reddit.com/r/bengals/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CIN",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=cin",
-        "https://www.cincyjungle.com/rss/current"
+        "https://www.reddit.com/r/bengals.rss",
+        "https://rsshub.app/twitter/user/PaulDehnerJr",
+        "https://rsshub.app/twitter/user/KelseyLConway",
+        "https://rsshub.app/twitter/user/Ben_Baby",
+        "https://rsshub.app/twitter/user/pauldehnerjr"
       ],
       "Cleveland Browns": [
         "https://www.clevelandbrowns.com/rss/news",
-        "https://www.reddit.com/r/Browns/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=CLE",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=cle",
-        "https://www.dawgsbynature.com/rss/current"
+        "https://www.reddit.com/r/Browns.rss",
+        "https://rsshub.app/twitter/user/MaryKayCabot",
+        "https://rsshub.app/twitter/user/AkronJackson"
       ],
       "Dallas Cowboys": [
         "https://www.dallascowboys.com/rss/news",
-        "https://www.reddit.com/r/cowboys/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DAL",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=dal",
-        "https://www.bloggingtheboys.com/rss/current"
+        "https://www.reddit.com/r/cowboys.rss",
+        "https://rsshub.app/twitter/user/kyle_youmans",
+        "https://rsshub.app/twitter/user/ClarenceHillJr",
+        "https://rsshub.app/twitter/user/toddarcher",
+        "https://rsshub.app/twitter/user/TimCowlishaw",
+        "https://rsshub.app/twitter/user/DavidMooreDMN",
+        "https://rsshub.app/twitter/user/CalvinWatkins"
       ],
       "Denver Broncos": [
         "https://www.denverbroncos.com/rss/news",
-        "https://www.reddit.com/r/DenverBroncos/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DEN",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=den",
-        "https://www.milehighreport.com/rss/current"
+        "https://www.reddit.com/r/DenverBroncos.rss",
+        "https://rsshub.app/twitter/user/mikeklis",
+        "https://rsshub.app/twitter/user/TroyRenck",
+        "https://rsshub.app/twitter/user/MaseDenver",
+        "https://rsshub.app/twitter/user/christomasson"
       ],
       "Detroit Lions": [
         "https://www.detroitlions.com/rss/news",
-        "https://www.reddit.com/r/detroitlions/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=DET",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=det",
-        "https://www.prideofdetroit.com/rss/current"
+        "https://www.reddit.com/r/detroitlions.rss",
+        "https://rsshub.app/twitter/user/colton_pouncy",
+        "https://rsshub.app/twitter/user/ttwentyman",
+        "https://rsshub.app/twitter/user/davebirkett",
+        "https://rsshub.app/twitter/user/Justin_Rogers"
       ],
       "Green Bay Packers": [
         "https://www.packers.com/rss/news",
-        "https://www.reddit.com/r/GreenBayPackers/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=GB",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=gb",
-        "https://www.acmepackingcompany.com/rss/current",
-        "https://thepowersweep.com/blog?format=RSS"
+        "https://www.reddit.com/r/GreenBayPackers.rss",
+        "https://rsshub.app/twitter/user/AndyHermanNFL",
+        "https://rsshub.app/twitter/user/mattschneidman",
+        "https://rsshub.app/twitter/user/TomSilverstein",
+        "https://rsshub.app/twitter/user/RobDemovsky"
       ],
       "Houston Texans": [
         "https://www.houstontexans.com/rss/news",
-        "https://www.reddit.com/r/Texans/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=HOU",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=hou",
-        "https://www.battleredblog.com/rss/current"
+        "https://www.reddit.com/r/Texans.rss",
+        "https://rsshub.app/twitter/user/JohnHCrumpler",
+        "https://rsshub.app/twitter/user/AaronWilson_NFL",
+        "https://rsshub.app/twitter/user/jonmalexander"
       ],
       "Indianapolis Colts": [
         "https://www.colts.com/rss/news",
-        "https://www.reddit.com/r/Colts/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=IND",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=ind",
-        "https://www.stampedeblue.com/rss/current"
+        "https://www.reddit.com/r/Colts.rss",
+        "https://rsshub.app/twitter/user/GMbremer",
+        "https://rsshub.app/twitter/user/mchappell51",
+        "https://rsshub.app/twitter/user/HolderStephen"
       ],
       "Jacksonville Jaguars": [
         "https://www.jaguars.com/rss/news",
-        "https://www.reddit.com/r/Jaguars/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=JAX",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=jax",
-        "https://www.bigcatcountry.com/rss/current"
+        "https://www.reddit.com/r/Jaguars.rss",
+        "https://rsshub.app/twitter/user/Demetrius82",
+        "https://rsshub.app/twitter/user/_John_Shipley",
+        "https://rsshub.app/twitter/user/HaysCarlyon"
       ],
       "Kansas City Chiefs": [
         "https://www.chiefs.com/rss/news",
-        "https://www.reddit.com/r/KansasCityChiefs/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=KC",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=kc",
-        "https://www.arrowheadpride.com/rss/current",
-        "https://www.chiefscrowd.com/feed/"
+        "https://www.reddit.com/r/KansasCityChiefs.rss",
+        "https://rsshub.app/twitter/user/mattderrick",
+        "https://rsshub.app/twitter/user/ByNateTaylor",
+        "https://rsshub.app/twitter/user/jessenewell",
+        "https://rsshub.app/twitter/user/adamteicher",
+        "https://rsshub.app/twitter/user/EdEastonJr"
       ],
       "Las Vegas Raiders": [
         "https://www.raiders.com/rss/news",
-        "https://www.reddit.com/r/raiders/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LV",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=lv",
-        "https://www.silverandblackpride.com/rss/current",
-        "https://raidersnewswire.com/feed/"
+        "https://www.reddit.com/r/raiders.rss",
+        "https://rsshub.app/twitter/user/VicTafur",
+        "https://rsshub.app/twitter/user/PGutierrezESPN",
+        "https://rsshub.app/twitter/user/tashanreed",
+        "https://rsshub.app/twitter/user/VinnyBonsignore"
       ],
       "Los Angeles Chargers": [
         "https://www.chargers.com/rss/news",
-        "https://www.reddit.com/r/Chargers/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LAC",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=lac",
-        "https://www.boltsfromtheblue.com/rss/current"
+        "https://www.reddit.com/r/Chargers.rss",
+        "https://rsshub.app/twitter/user/danielrpopper",
+        "https://rsshub.app/twitter/user/krisrhim1"
       ],
       "Los Angeles Rams": [
         "https://www.therams.com/rss/news",
-        "https://www.reddit.com/r/LosAngelesRams/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=LAR",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=lar",
-        "https://www.turfshowtimes.com/rss/current"
+        "https://www.reddit.com/r/LosAngelesRams.rss",
+        "https://rsshub.app/twitter/user/JourdanRodrigue",
+        "https://rsshub.app/twitter/user/LATimesklein"
       ],
       "Miami Dolphins": [
         "https://www.miamidolphins.com/rss/news",
-        "https://www.reddit.com/r/miamidolphins/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=MIA",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=mia",
-        "https://www.thephinsider.com/rss/current"
+        "https://www.reddit.com/r/miamidolphins.rss",
+        "https://rsshub.app/twitter/user/DavidFurones_",
+        "https://rsshub.app/twitter/user/schadjoe"
       ],
       "Minnesota Vikings": [
         "https://www.vikings.com/rss/news",
-        "https://www.reddit.com/r/minnesotavikings/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=MIN",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=min",
-        "https://www.dailynorseman.com/rss/current",
-        "https://vikingsterritory.com/feed"
+        "https://www.reddit.com/r/minnesotavikings.rss",
+        "https://rsshub.app/twitter/user/alec_lewis",
+        "https://rsshub.app/twitter/user/BenGoessling",
+        "https://rsshub.app/twitter/user/ArifHasanNFL",
+        "https://rsshub.app/twitter/user/LindseyMNSports"
       ],
       "New England Patriots": [
-        "https://www.patriots.com/rss/article",
-        "https://www.reddit.com/r/Patriots/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NE",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=ne",
-        "https://www.patspulpit.com/rss/current",
-        "https://www.patspropaganda.com/feed/"
+        "https://www.patriots.com/rss/news",
+        "https://www.reddit.com/r/Patriots.rss",
+        "https://rsshub.app/twitter/user/MikeReiss",
+        "https://rsshub.app/twitter/user/ezlazar",
+        "https://rsshub.app/twitter/user/PhilAPerry"
       ],
       "New Orleans Saints": [
         "https://www.neworleanssaints.com/rss/news",
-        "https://www.reddit.com/r/Saints/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NO",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=no",
-        "https://www.canalstreetchronicles.com/rss/current"
+        "https://www.reddit.com/r/Saints.rss",
+        "https://rsshub.app/twitter/user/nick_underhill",
+        "https://rsshub.app/twitter/user/MikeTriplett",
+        "https://rsshub.app/twitter/user/Kat_Terrell",
+        "https://rsshub.app/twitter/user/ByLukeJohnson"
       ],
       "New York Giants": [
         "https://www.giants.com/rss/news",
-        "https://www.reddit.com/r/NYGiants/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NYG",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=nyg",
-        "https://www.bigblueview.com/rss/current"
+        "https://www.reddit.com/r/NYGiants.rss",
+        "https://rsshub.app/twitter/user/JordanRaanan",
+        "https://rsshub.app/twitter/user/NYPost_Schwartz",
+        "https://rsshub.app/twitter/user/DDuggan21",
+        "https://rsshub.app/twitter/user/rydunleavy"
       ],
       "New York Jets": [
         "https://www.newyorkjets.com/rss/news",
-        "https://www.reddit.com/r/nyjets/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=NYJ",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=nyj",
-        "https://www.ganggreennation.com/rss/current",
-        "https://nypost.com/new-york-jets/feed/",
-        "https://feeds.feedburner.com/Jetnationcom"
+        "https://www.reddit.com/r/nyjets.rss",
+        "https://rsshub.app/twitter/user/BrianCoz",
+        "https://rsshub.app/twitter/user/RichCimini"
       ],
       "Philadelphia Eagles": [
         "https://www.philadelphiaeagles.com/rss/news",
-        "https://www.reddit.com/r/eagles/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=PHI",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=phi",
-        "https://www.bleedinggreennation.com/rss/current"
+        "https://www.reddit.com/r/eagles.rss",
+        "https://rsshub.app/twitter/user/Jeff_McLane",
+        "https://rsshub.app/twitter/user/EliotShorrParks",
+        "https://rsshub.app/twitter/user/ZBerm",
+        "https://rsshub.app/twitter/user/JimmyKempski",
+        "https://rsshub.app/twitter/user/BKubena"
       ],
       "Pittsburgh Steelers": [
         "https://www.steelers.com/rss/news",
-        "https://www.reddit.com/r/steelers/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=PIT",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=pit",
-        "https://www.behindthesteelcurtain.com/rss/current",
-        "https://feeds.feedburner.com/SteelersDepotBlog",
-        "https://www.steelcityunderground.com/feed/"
+        "https://www.reddit.com/r/steelers.rss",
+        "https://rsshub.app/twitter/user/MarkKaboly",
+        "https://rsshub.app/twitter/user/Alex_Kozora",
+        "https://rsshub.app/twitter/user/dlolley_pgh"
       ],
       "San Francisco 49ers": [
-        "https://www.49ers.com/rss/article",
-        "https://www.reddit.com/r/49ers/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=SF",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=sf",
-        "https://www.ninersnation.com/rss/current"
+        "https://www.49ers.com/rss/news",
+        "https://www.reddit.com/r/49ers.rss",
+        "https://rsshub.app/twitter/user/LombardiHimself",
+        "https://rsshub.app/twitter/user/Eric_Branch",
+        "https://rsshub.app/twitter/user/CamInman",
+        "https://rsshub.app/twitter/user/VicTafur",
+        "https://rsshub.app/twitter/user/grantcohn"
       ],
       "Seattle Seahawks": [
         "https://www.seahawks.com/rss/news",
-        "https://www.reddit.com/r/Seahawks/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=SEA",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=sea",
-        "https://www.fieldgulls.com/rss/current"
+        "https://www.reddit.com/r/Seahawks.rss",
+        "https://rsshub.app/twitter/user/Gbellseattle",
+        "https://rsshub.app/twitter/user/bcondotta",
+        "https://rsshub.app/twitter/user/gbellseattle"
       ],
       "Tampa Bay Buccaneers": [
         "https://www.buccaneers.com/rss/news",
-        "https://www.reddit.com/r/buccaneers/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=TB",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=tb",
-        "https://www.bucsnation.com/rss/current",
-        "https://www.pewterreport.com/feed/"
+        "https://www.reddit.com/r/buccaneers.rss",
+        "https://rsshub.app/twitter/user/NFLSTROUD",
+        "https://rsshub.app/twitter/user/GregAuman",
+       
+        "https://rsshub.app/twitter/user/PewterReport"
       ],
       "Tennessee Titans": [
         "https://www.tennesseetitans.com/rss/news",
-        "https://www.reddit.com/r/Tennesseetitans/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=TEN",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=ten",
-        "https://www.musiccitymiracles.com/rss/current"
+        "https://www.reddit.com/r/Tennesseetitans.rss",
+        "https://rsshub.app/twitter/user/nicksuss",
+        "https://rsshub.app/twitter/user/terrymc13",
+        "https://rsshub.app/twitter/user/jwyattsports",
+        "https://rsshub.app/twitter/user/TDavenport_NFL"
       ],
       "Washington Commanders": [
         "https://www.commanders.com/rss/news",
-        "https://www.reddit.com/r/Commanders/.rss",
-        "https://www.rotowire.com/rss/news.htm?type=news&sport=nfl&team=WAS",
-        "https://www.espn.com/espn/rss/nfl/teams/news?team=was",
-        "https://www.hogshaven.com/rss/current"
+        "https://www.reddit.com/r/Commanders.rss",
+        "https://rsshub.app/twitter/user/BenStandig",
+        "https://rsshub.app/twitter/user/John_Keim",
+        
       ]
     }
   }
