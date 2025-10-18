@@ -1,6 +1,6 @@
 """
 EndzoneHubV1 
-Professional dark theme with real-time news aggregation
+real-time news aggregation
 """
 
 import feedparser
@@ -174,7 +174,7 @@ def fetch_all_news() -> pd.DataFrame:
     # Fetch team-specific feeds
     team_feeds_dict = RSS_FEEDS.get('team_feeds', {})
     for team, feeds in team_feeds_dict.items():
-        team_feed_list = [(url, team) for url in feeds]
+        team_feed_list = [(f['url'], f['name']) for f in feeds]
         articles = fetcher.fetch_multiple_feeds(team_feed_list, max_workers=APP.get('max_workers', 15))
         
         for article in articles:
