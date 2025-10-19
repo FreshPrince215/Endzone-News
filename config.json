@@ -212,5 +212,63 @@
         "https://www.commanders.com/rss/news"
       ]
     }
+  },
+  "player_highlights": {
+    "Baltimore Ravens": [
+      {
+        "name": "Lamar Jackson",
+        "position": "QB",
+        "number": "8",
+        "videos": [
+          {
+            "title": "2024 Season Highlights",
+            "video_id": "Yox49KwWHt0"
+          },
+          {
+            "title": "Best Plays Compilation",
+            "video_id": "a7m1XJLGRRA"
+          }
+        ]
+      },
+      {
+        "name": "Derrick Henry",
+        "position": "RB",
+        "number": "22",
+        "videos": [
+          {
+            "title": "2024 Ravens Highlights",
+            "video_id": "3Yf-w9HWrQ0"
+          },
+          {
+            "title": "Career Highlights",
+            "video_id": "3wWJqRPOvlk"
+          }
+        ]
+      }
+    ],
+    "Philadelphia Eagles": [
+      {
+        "name": "Jalen Hurts",
+        "position": "QB",
+        "number": "1",
+        "videos": [
+          {
+            "title": "2024 Season Highlights",
+            "video_id": "FEr15iGYxJ4"
+          }
+        ]
+      },
+      {
+        "name": "Saquon Barkley",
+        "position": "RB",
+        "number": "26",
+        "videos": [
+          {
+            "title": "Eagles 2024 Highlights",
+            "video_id": "y1CR28AtiQQ"
+          }
+        ]
+      }
+    ]
   }
 }
