@@ -1,6 +1,6 @@
 """
 NFL News Terminal 
-Professional-grade NFL news aggregation
+Professional-grade NFL news aggregation with Player Film Room
 """
 
 import feedparser
@@ -38,6 +38,7 @@ CONFIG = load_config()
 APP = CONFIG.get('app', {})
 TEAMS = CONFIG.get('teams', [])
 RSS_FEEDS = CONFIG.get('rss_feeds', {})
+PLAYER_HIGHLIGHTS = CONFIG.get('player_highlights', {})
 
 # =============================================================================
 # PAGE CONFIGURATION
@@ -68,11 +69,8 @@ class FeedFetcher:
         """Remove HTML tags and clean text"""
         if not text:
             return ""
-        # Remove HTML tags
         text = re.sub(r'<[^>]+>', '', text)
-        # Remove extra whitespace
         text = ' '.join(text.split())
-        # Truncate if too long
         if len(text) > 300:
             text = text[:300] + '...'
         return text
@@ -96,7 +94,6 @@ class FeedFetcher:
                 if not title or not link:
                     continue
                 
-                # Parse publication date
                 pub_parsed = entry.get('published_parsed') or entry.get('updated_parsed')
                 if pub_parsed:
                     try:
@@ -169,7 +166,6 @@ class DataProcessor:
         """Extract team name from article title"""
         text_upper = text.upper()
         
-        # Check for team names and common abbreviations
         team_keywords = {
             'CARDINALS': 'Arizona Cardinals',
             'FALCONS': 'Atlanta Falcons',
@@ -210,7 +206,6 @@ class DataProcessor:
             if keyword in text_upper:
                 return team
         
-        # Fallback to full team name check
         for team in teams:
             if team.upper() in text_upper:
                 return team
@@ -227,7 +222,6 @@ def fetch_all_news() -> pd.DataFrame:
     fetcher = FeedFetcher(days_lookback=APP.get('days_lookback', 7))
     news_items = []
     
-    # Fetch general news feeds
     general_feeds = [
         (feed['url'], feed['name']) 
         for feed in RSS_FEEDS.get('general_news', []) 
@@ -248,7 +242,6 @@ def fetch_all_news() -> pd.DataFrame:
                 'summary': article['summary']
             })
     
-    # Fetch team-specific feeds
     team_feeds_dict = RSS_FEEDS.get('team_feeds', {})
     for team, feeds in team_feeds_dict.items():
         if isinstance(feeds, list):
@@ -282,7 +275,6 @@ def apply_bloomberg_css():
     """Apply Bloomberg Terminal inspired CSS"""
     st.markdown("""
     <style>
-        /* Global Dark Theme */
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
         
         :root {
@@ -306,7 +298,6 @@ def apply_bloomberg_css():
             background-color: var(--bg-primary);
         }
         
-        /* Terminal Header */
         .terminal-header {
             background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
             border-bottom: 2px solid var(--accent-orange);
@@ -364,7 +355,6 @@ def apply_bloomberg_css():
             50% { opacity: 0.4; }
         }
         
-        /* Control Panel */
         .control-label {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 10px;
@@ -375,7 +365,6 @@ def apply_bloomberg_css():
             font-weight: 600;
         }
         
-        /* Stats Dashboard */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -407,7 +396,6 @@ def apply_bloomberg_css():
             letter-spacing: 1.5px;
         }
         
-        /* News Feed */
         .news-item {
             background: var(--bg-secondary);
             border-left: 3px solid var(--accent-blue);
@@ -478,7 +466,78 @@ def apply_bloomberg_css():
             margin-top: 8px;
         }
         
-        /* Streamlit Overrides */
+        /* Player Film Styles */
+        .player-card {
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--accent-blue);
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.2s ease;
+        }
+        
+        .player-card:hover {
+            background: var(--bg-tertiary);
+            border-left-color: var(--accent-orange);
+        }
+        
+        .player-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-orange);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        
+        .player-info {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .player-detail {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        
+        .player-detail-label {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+        
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .video-button {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--accent-blue);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            display: block;
+            width: 100%;
+            text-decoration: none;
+        }
+        
+        .video-button:hover {
+            background: var(--accent-blue);
+            color: #000;
+            border-color: var(--accent-blue);
+        }
+        
         .stSelectbox > div > div {
             background: var(--bg-tertiary);
             border: 1px solid var(--border-color);
@@ -515,7 +574,30 @@ def apply_bloomberg_css():
             color: #000;
         }
         
-        /* Scrollbar */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 0px;
+            background-color: var(--bg-secondary);
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            color: var(--text-secondary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 12px 24px;
+        }
+        
+        .stTabs [data-baseweb="tab"][aria-selected="true"] {
+            background-color: var(--bg-primary);
+            color: var(--accent-orange);
+            border-bottom: 2px solid var(--accent-orange);
+        }
+        
         ::-webkit-scrollbar {
             width: 10px;
         }
@@ -533,13 +615,11 @@ def apply_bloomberg_css():
             background: #ff9d1f;
         }
         
-        /* Hide Streamlit elements */
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
         .stDeployButton {display: none;}
         
-        /* Section Headers */
         .section-header {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 13px;
@@ -563,7 +643,7 @@ def render_terminal_header():
         <div class="terminal-logo">
             <div>
                 <div class="terminal-title">🏈 NFL TERMINAL</div>
-                <div class="terminal-subtitle">Real-Time News Aggregation System</div>
+                <div class="terminal-subtitle">Real-Time News Aggregation & Film Room</div>
             </div>
         </div>
         <div>
@@ -626,21 +706,73 @@ def render_news_item(row: pd.Series):
     </div>
     """, unsafe_allow_html=True)
 
-def get_time_ago(date: datetime) -> str:
-    """Get human-readable time ago string"""
-    now = datetime.now()
-    diff = now - date
+def render_player_film():
+    """Render player film room"""
+    st.markdown('<div class="section-header">PLAYER FILM ROOM</div>', unsafe_allow_html=True)
     
-    if diff.days > 0:
-        return f"{diff.days}d ago"
-    elif diff.seconds >= 3600:
-        hours = diff.seconds // 3600
-        return f"{hours}h ago"
-    elif diff.seconds >= 60:
-        minutes = diff.seconds // 60
-        return f"{minutes}m ago"
-    else:
-        return "just now"
+    if not PLAYER_HIGHLIGHTS:
+        st.info("⚠️ No player highlights configured. Add 'player_highlights' to config.json")
+        return
+    
+    # Team filter
+    teams_with_players = sorted(list(PLAYER_HIGHLIGHTS.keys()))
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown('<div class="control-label">SELECT TEAM</div>', unsafe_allow_html=True)
+        selected_team = st.selectbox(
+            'Team',
+            ['ALL TEAMS'] + teams_with_players,
+            label_visibility="collapsed",
+            key='film_team_filter'
+        )
+    
+    # Display players
+    teams_to_show = teams_with_players if selected_team == 'ALL TEAMS' else [selected_team]
+    
+    for team in teams_to_show:
+        if team not in PLAYER_HIGHLIGHTS:
+            continue
+            
+        players = PLAYER_HIGHLIGHTS[team]
+        
+        st.markdown(f'<div class="section-header" style="margin-top: 25px;">{team}</div>', unsafe_allow_html=True)
+        
+        for player_data in players:
+            player_name = player_data.get('name', 'Unknown Player')
+            position = player_data.get('position', 'N/A')
+            number = player_data.get('number', 'N/A')
+            videos = player_data.get('videos', [])
+            
+            # Player card
+            video_buttons_html = ""
+            for idx, video in enumerate(videos):
+                video_id = video.get('video_id', '')
+                video_title = video.get('title', f'Highlight {idx + 1}')
+                youtube_url = f"https://www.youtube.com/watch?v={video_id}"
+                
+                video_buttons_html += f'''
+                <a href="{youtube_url}" target="_blank" class="video-button">
+                    ▶ {video_title}
+                </a>
+                '''
+            
+            st.markdown(f"""
+            <div class="player-card">
+                <div class="player-name">#{number} {player_name}</div>
+                <div class="player-info">
+                    <div class="player-detail">
+                        <span class="player-detail-label">POSITION:</span> {position}
+                    </div>
+                    <div class="player-detail">
+                        <span class="player-detail-label">HIGHLIGHTS:</span> {len(videos)}
+                    </div>
+                </div>
+                <div class="video-grid">
+                    {video_buttons_html}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
 # =============================================================================
 # MAIN APPLICATION
@@ -651,71 +783,78 @@ def main():
     apply_bloomberg_css()
     render_terminal_header()
     
-    # Control Panel
-    col1, col2, col3 = st.columns([3, 2, 1])
+    # Tab navigation
+    tab1, tab2 = st.tabs(["📰 NEWS FEED", "🎬 PLAYER FILM"])
     
-    with col1:
-        st.markdown('<div class="control-label">SELECT TEAM</div>', unsafe_allow_html=True)
-        team_options = ['ALL TEAMS'] + sorted(TEAMS)
-        selected_team = st.selectbox(
-            'Team Filter',
-            team_options,
-            label_visibility="collapsed",
-            key='team_filter'
-        )
-    
-    with col2:
-        st.markdown('<div class="control-label">TIME RANGE</div>', unsafe_allow_html=True)
-        time_options = {
-            'LAST 24 HOURS': 1,
-            'LAST 3 DAYS': 3,
-            'LAST 7 DAYS': 7
-        }
-        selected_time = st.selectbox(
-            'Time Range',
-            list(time_options.keys()),
-            index=2,
-            label_visibility="collapsed",
-            key='time_filter'
-        )
-    
-    with col3:
-        st.markdown('<div class="control-label">ACTIONS</div>', unsafe_allow_html=True)
-        if st.button("⟳ REFRESH", use_container_width=True):
-            st.cache_data.clear()
-            st.rerun()
-    
-    # Load data
-    with st.spinner('■ LOADING FEED DATA...'):
-        df = fetch_all_news()
-    
-    if df.empty:
-        st.warning("⚠ NO DATA AVAILABLE | CHECK FEED SOURCES")
-        st.info("Verify that RSS feeds in config.json are accessible and enabled.")
-        return
-    
-    # Filter by team
-    if selected_team != 'ALL TEAMS':
-        df_filtered = df[df['team'] == selected_team].copy()
-    else:
-        df_filtered = df.copy()
-    
-    # Filter by date
-    cutoff = datetime.now() - timedelta(days=time_options[selected_time])
-    df_filtered = df_filtered[df_filtered['date'] >= cutoff]
-    
-    # Render stats
-    render_stats_dashboard(df_filtered)
-    
-    # Render news feed
-    if not df_filtered.empty:
-        st.markdown(f'<div class="section-header">NEWS FEED — {len(df_filtered)} ITEMS</div>', unsafe_allow_html=True)
+    with tab1:
+        # Control Panel
+        col1, col2, col3 = st.columns([3, 2, 1])
         
-        for _, row in df_filtered.iterrows():
-            render_news_item(row)
-    else:
-        st.info(f"⚠ NO ARTICLES FOUND | {selected_team} | {selected_time}")
-        st.caption("Try adjusting the time range or selecting a different team.")
+        with col1:
+            st.markdown('<div class="control-label">SELECT TEAM</div>', unsafe_allow_html=True)
+            team_options = ['ALL TEAMS'] + sorted(TEAMS)
+            selected_team = st.selectbox(
+                'Team Filter',
+                team_options,
+                label_visibility="collapsed",
+                key='team_filter'
+            )
+        
+        with col2:
+            st.markdown('<div class="control-label">TIME RANGE</div>', unsafe_allow_html=True)
+            time_options = {
+                'LAST 24 HOURS': 1,
+                'LAST 3 DAYS': 3,
+                'LAST 7 DAYS': 7
+            }
+            selected_time = st.selectbox(
+                'Time Range',
+                list(time_options.keys()),
+                index=2,
+                label_visibility="collapsed",
+                key='time_filter'
+            )
+        
+        with col3:
+            st.markdown('<div class="control-label">ACTIONS</div>', unsafe_allow_html=True)
+            if st.button("⟳ REFRESH", use_container_width=True):
+                st.cache_data.clear()
+                st.rerun()
+        
+        # Load data
+        with st.spinner('▐ LOADING FEED DATA...'):
+            df = fetch_all_news()
+        
+        if df.empty:
+            st.warning("⚠ NO DATA AVAILABLE | CHECK FEED SOURCES")
+            st.info("Verify that RSS feeds in config.json are accessible and enabled.")
+            return
+        
+        # Filter by team
+        if selected_team != 'ALL TEAMS':
+            df_filtered = df[df['team'] == selected_team].copy()
+        else:
+            df_filtered = df.copy()
+        
+        # Filter by date
+        cutoff = datetime.now() - timedelta(days=time_options[selected_time])
+        df_filtered = df_filtered[df_filtered['date'] >= cutoff]
+        
+        # Render stats
+        render_stats_dashboard(df_filtered)
+        
+        # Render news feed
+        if not df_filtered.empty:
+            st.markdown(f'<div class="section-header">NEWS FEED — {len(df_filtered)} ITEMS</div>', unsafe_allow_html=True)
+            
+            for _, row in df_filtered.iterrows():
+                render_news_item(row)
+        else:
+            st.info(f"⚠ NO ARTICLES FOUND | {selected_team} | {selected_time}")
+            st.caption("Try adjusting the time range or selecting a different team.")
+    
+    with tab2:
+        render_player_film()
 
 if __name__ == "__main__":
     main()
