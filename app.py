@@ -471,71 +471,65 @@ def apply_bloomberg_css():
             background: var(--bg-secondary);
             border-left: 3px solid var(--accent-blue);
             padding: 20px;
-            margin-bottom: 15px;
-            transition: all 0.2s ease;
+            margin-bottom: 20px;
         }
         
-        .player-card:hover {
-            background: var(--bg-tertiary);
-            border-left-color: var(--accent-orange);
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .player-name {
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: var(--accent-orange);
-            margin-bottom: 8px;
             letter-spacing: 1px;
         }
         
         .player-info {
             display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
         }
         
-        .player-detail {
+        .player-badge {
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-        
-        .player-detail-label {
-            color: var(--accent-green);
-            font-weight: 600;
-        }
-        
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 12px;
-            margin-top: 12px;
-        }
-        
-        .video-button {
+            font-size: 10px;
             background: var(--bg-tertiary);
-            border: 1px solid var(--accent-blue);
-            color: var(--text-primary);
-            padding: 12px 16px;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 11px;
+            color: var(--accent-green);
+            padding: 5px 12px;
             font-weight: 600;
-            text-transform: uppercase;
             letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
-            display: block;
-            width: 100%;
-            text-decoration: none;
+            border: 1px solid var(--border-color);
         }
         
-        .video-button:hover {
-            background: var(--accent-blue);
-            color: #000;
-            border-color: var(--accent-blue);
+        .video-container {
+            margin-top: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
+        
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 15px;
+        }
+        
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--border-color);
         }
         
         .stSelectbox > div > div {
@@ -707,17 +701,17 @@ def render_news_item(row: pd.Series):
     """, unsafe_allow_html=True)
 
 def render_player_film():
-    """Render player film room"""
+    """Render player film room with embedded videos"""
     st.markdown('<div class="section-header">PLAYER FILM ROOM</div>', unsafe_allow_html=True)
     
     if not PLAYER_HIGHLIGHTS:
         st.info("⚠️ No player highlights configured. Add 'player_highlights' to config.json")
         return
     
-    # Team filter
+    # Team and Player filters
     teams_with_players = sorted(list(PLAYER_HIGHLIGHTS.keys()))
     
-    col1, col2 = st.columns([3, 1])
+    col1, col2 = st.columns([2, 2])
     with col1:
         st.markdown('<div class="control-label">SELECT TEAM</div>', unsafe_allow_html=True)
         selected_team = st.selectbox(
@@ -727,52 +721,80 @@ def render_player_film():
             key='film_team_filter'
         )
     
+    with col2:
+        # Get available players based on team selection
+        if selected_team == 'ALL TEAMS':
+            all_players = []
+            for team_players in PLAYER_HIGHLIGHTS.values():
+                all_players.extend(list(team_players.keys()))
+            available_players = sorted(all_players)
+        else:
+            available_players = sorted(list(PLAYER_HIGHLIGHTS.get(selected_team, {}).keys()))
+        
+        st.markdown('<div class="control-label">SELECT PLAYER</div>', unsafe_allow_html=True)
+        selected_player = st.selectbox(
+            'Player',
+            ['ALL PLAYERS'] + available_players,
+            label_visibility="collapsed",
+            key='film_player_filter'
+        )
+    
     # Display players
     teams_to_show = teams_with_players if selected_team == 'ALL TEAMS' else [selected_team]
     
     for team in teams_to_show:
         if team not in PLAYER_HIGHLIGHTS:
             continue
-            
-        players = PLAYER_HIGHLIGHTS[team]
+        
+        players_dict = PLAYER_HIGHLIGHTS[team]
+        
+        # Filter players if specific player selected
+        if selected_player != 'ALL PLAYERS':
+            if selected_player not in players_dict:
+                continue
+            players_dict = {selected_player: players_dict[selected_player]}
+        
+        if not players_dict:
+            continue
         
         st.markdown(f'<div class="section-header" style="margin-top: 25px;">{team}</div>', unsafe_allow_html=True)
         
-        for player_data in players:
-            player_name = player_data.get('name', 'Unknown Player')
+        for player_name, player_data in players_dict.items():
             position = player_data.get('position', 'N/A')
             number = player_data.get('number', 'N/A')
             videos = player_data.get('videos', [])
             
-            # Player card
-            video_buttons_html = ""
-            for idx, video in enumerate(videos):
-                video_id = video.get('video_id', '')
-                video_title = video.get('title', f'Highlight {idx + 1}')
-                youtube_url = f"https://www.youtube.com/watch?v={video_id}"
-                
-                video_buttons_html += f'''
-                <a href="{youtube_url}" target="_blank" class="video-button">
-                    ▶ {video_title}
-                </a>
-                '''
-            
+            # Player card header
             st.markdown(f"""
             <div class="player-card">
-                <div class="player-name">#{number} {player_name}</div>
-                <div class="player-info">
-                    <div class="player-detail">
-                        <span class="player-detail-label">POSITION:</span> {position}
+                <div class="player-header">
+                    <div class="player-name">#{number} {player_name}</div>
+                    <div class="player-info">
+                        <span class="player-badge">POS: {position}</span>
+                        <span class="player-badge">VIDEOS: {len(videos)}</span>
                     </div>
-                    <div class="player-detail">
-                        <span class="player-detail-label">HIGHLIGHTS:</span> {len(videos)}
-                    </div>
-                </div>
-                <div class="video-grid">
-                    {video_buttons_html}
                 </div>
             </div>
             """, unsafe_allow_html=True)
+            
+            # Display videos in columns
+            if videos:
+                num_cols = min(2, len(videos))
+                cols = st.columns(num_cols)
+                
+                for idx, video_id in enumerate(videos):
+                    col_idx = idx % num_cols
+                    with cols[col_idx]:
+                        st.markdown(f"""
+                        <div class="video-wrapper">
+                            <iframe 
+                                src="https://www.youtube.com/embed/{video_id}" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        """, unsafe_allow_html=True)
 
 # =============================================================================
 # MAIN APPLICATION
