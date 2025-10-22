@@ -213,6 +213,100 @@
       ]
     }
   },
+  "injury_analysis": {
+    "reels": [
+      {
+        "url": "https://www.instagram.com/reel/DQEsmQuDUV6/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DQDSg_oDDLV/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DQCY72jDemz/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DQAd3LUkihE/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DQAhdcQEgsQ/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DP_e4HrjX1t/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DQEowelDS8S/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DP3s4aWkaD6/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DQDTe-UjIPk/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DP6_rVOEl4L/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DP_44FDkY55/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DP1gn2OEQ3O/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DP9UQf1Dpdx/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/reel/DQAhz6BkdJz/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      },
+      {
+        "url": "https://www.instagram.com/sportsmedanalytics/reel/DP_yjkODhre/",
+        "player": "Various Players",
+        "injury_type": "General Analysis",
+        "team": "NFL General"
+      }
+    ]
+  },
   "player_highlights": {
     "Baltimore Ravens": {
       "Lamar Jackson": {
