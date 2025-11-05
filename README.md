@@ -1,6 +1,6 @@
-# 🏈 NFL News Aggregator
+# 🏈 NFL News Aggregator Project 
 
-A professional, real-time news aggregation platform that consolidates NFL news from 10+ major sports media sources into a single, streamlined interface. Built with Python and Streamlit, featuring dark/light mode themes and advanced filtering capabilities.
+Real-time news aggregation platform that consolidates NFL news from 10+ major sports media sources into a single, streamlined interface. Built with Python and Streamlit, featuring dark/light mode themes and advanced filtering capabilities.
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)
