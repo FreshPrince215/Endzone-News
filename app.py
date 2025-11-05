@@ -578,8 +578,6 @@ def apply_application_styles():
 
 def render_application_header():
     """Render the application header with theme toggle"""
-    current_time = datetime.now().strftime('%I:%M %p EST')
-    
     col1, col2 = st.columns([3, 1])
     
     with col1:
@@ -594,7 +592,7 @@ def render_application_header():
             <div>
                 <div class="status-indicator">
                     <div class="status-dot"></div>
-                    LIVE | {current_time}
+                    LIVE
                 </div>
             </div>
         </div>
@@ -623,15 +621,14 @@ def render_metrics_dashboard(df: pd.DataFrame):
 
 def render_news_article(row: pd.Series):
     """Render individual news article card"""
-    timestamp = row['date'].strftime('%I:%M %p')
-    date_str = row['date'].strftime('%b %d')
+    date_str = row['date'].strftime('%b %d, %Y')
     
     summary_html = f"<div class='article-summary'>{row['summary']}</div>" if row['summary'] else ""
     
     st.markdown(f"""
     <div class="news-article">
         <div class="article-header">
-            <span class="article-timestamp">{date_str} • {timestamp}</span>
+            <span class="article-timestamp">{date_str}</span>
             <span class="article-team-badge">{row['team']}</span>
             <span class="article-source">{row['source']}</span>
         </div>
