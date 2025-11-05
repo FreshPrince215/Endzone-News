@@ -611,27 +611,12 @@ def render_metrics_dashboard(df: pd.DataFrame):
         return
     
     total_articles = len(df)
-    teams_covered = df['team'].nunique()
-    sources = df['source'].nunique()
-    last_24h = len(df[df['date'] > datetime.now() - timedelta(hours=24)])
     
     st.markdown(f"""
     <div class="metrics-grid">
         <div class="metric-card">
             <div class="metric-value">{total_articles}</div>
             <div class="metric-label">Total Articles</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value">{teams_covered}</div>
-            <div class="metric-label">Teams Covered</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value">{sources}</div>
-            <div class="metric-label">News Sources</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value">{last_24h}</div>
-            <div class="metric-label">Last 24 Hours</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -680,7 +665,7 @@ def main():
     # Filters
     st.markdown('<div class="section-title">📰 News Feed</div>', unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns([2, 2, 1])
+    col1, col2 = st.columns([2, 2])
     
     with col1:
         st.markdown('<div class="filter-label">Filter by Team</div>', unsafe_allow_html=True)
@@ -692,15 +677,6 @@ def main():
         )
     
     with col2:
-        st.markdown('<div class="filter-label">Filter by Source</div>', unsafe_allow_html=True)
-        selected_source = st.selectbox(
-            'Source',
-            ['All Sources'] + sorted(df['source'].unique().tolist()),
-            label_visibility="collapsed",
-            key='source_filter'
-        )
-    
-    with col3:
         st.markdown('<div class="filter-label">Sort By</div>', unsafe_allow_html=True)
         sort_order = st.selectbox(
             'Sort',
@@ -714,9 +690,6 @@ def main():
     
     if selected_team != 'All Teams':
         filtered_df = filtered_df[filtered_df['team'] == selected_team]
-    
-    if selected_source != 'All Sources':
-        filtered_df = filtered_df[filtered_df['source'] == selected_source]
     
     # Apply sorting
     if sort_order == 'Oldest First':
