@@ -30,7 +30,7 @@ This application solves the problem of information overload in sports news by ag
 - **Smart Search**: Automatic team detection from article headlines
 
 ### 📊 Analytics Dashboard
-- **Total Articles**: Track the volume of news coverage
+- **Total Articles**: Track the volume of news coverage at a glance
 
 ### 🚀 Performance Optimization
 - **Parallel Processing**: Concurrent feed fetching using ThreadPoolExecutor
@@ -209,13 +209,11 @@ The `config.json` file controls all application settings and data sources.
 
 1. **View All News**: Default view shows all articles from all teams
 2. **Filter by Team**: Select a specific team from the dropdown to see team-specific news
-3. **Filter by Source**: Choose a news outlet to see only their articles
-4. **Sort Articles**: Toggle between newest/oldest first
-5. **Toggle Theme**: Click the theme button to switch between dark/light modes
+3. **Sort Articles**: Toggle between newest/oldest first
+4. **Toggle Theme**: Click the theme button to switch between dark/light modes
 
 ### Advanced Tips
 
-- **Multiple Filters**: Combine team and source filters for precise results
 - **Fresh Data**: The app auto-refreshes every 30 minutes, or manually refresh the page
 - **Article Summaries**: Hover over articles to see preview summaries
 - **External Links**: Click any headline to read the full article on the source website
@@ -368,60 +366,7 @@ EXPOSE 8501
 CMD ["streamlit", "run", "app.py"]
 ```
 
-## 🔮 Future Enhancements
 
-### Planned Features
-- [ ] Search functionality across all articles
-- [ ] Email notifications for breaking news
-- [ ] Sentiment analysis on articles
-- [ ] Save favorite articles/teams
-- [ ] Export filtered results to PDF/CSV
-- [ ] Player-specific news filtering
-- [ ] Social media integration (Twitter trending)
-- [ ] Mobile app version
-- [ ] Multi-language support
-- [ ] Historical news archive
-
-### Technical Improvements
-- [ ] Add unit tests (pytest)
-- [ ] Implement CI/CD pipeline
-- [ ] Add API rate limiting
-- [ ] Database storage for historical data
-- [ ] WebSocket for real-time updates
-- [ ] GraphQL API for custom queries
-- [ ] Redis caching for better performance
-
-## 📈 Performance Metrics
-
-### Typical Performance
-- **Feed Fetch Time**: 2-4 seconds (80+ feeds)
-- **Cache Hit Rate**: 95%+ during active usage
-- **Memory Usage**: ~150MB typical operation
-- **Articles Processed**: 300-500 per refresh
-- **Deduplication Rate**: Removes ~20-30% duplicates
-
-### Scalability
-- **Concurrent Users**: Supports 100+ simultaneous users
-- **Feed Capacity**: Can handle 200+ RSS feeds
-- **Data Volume**: Processes 1000+ articles efficiently
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. **Fork the repository**
-2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
-3. **Commit your changes** (`git commit -m 'Add amazing feature'`)
-4. **Push to branch** (`git push origin feature/amazing-feature`)
-5. **Open a Pull Request**
-
-### Contribution Ideas
-- Add new RSS feed sources
-- Improve team detection algorithm
-- Enhance UI/UX design
-- Add internationalization
-- Write documentation
-- Report bugs
 
 ## 📝 License
 
@@ -431,8 +376,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Your Name**
 - LinkedIn: [your-linkedin-profile](https://linkedin.com/in/yourprofile)
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
+- GitHub: [@yourusername](https://github.com/FreshPrince215)
+
 
 ## 🙏 Acknowledgments
 
@@ -460,7 +405,3 @@ This project demonstrates proficiency in:
 Perfect for demonstrating full-stack capabilities to potential employers!
 
 ---
-
-**⭐ If you find this project useful, please star the repository!**
-
-**Built with ❤️ for NFL fans and data enthusiasts**
