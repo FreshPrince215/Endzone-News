@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "NFL News Terminal",
+    "title": "NFL News Aggregator",
     "page_icon": "🏈",
     "cache_ttl": 1800,
     "days_lookback": 7,
@@ -53,42 +53,42 @@
         "enabled": true
       },
       {
-        "name": "NBC PFT",
+        "name": "NBC Sports",
         "url": "https://profootballtalk.nbcsports.com/feed/",
         "enabled": true
       },
       {
-        "name": "NBC Edge NFL",
+        "name": "NBC Edge",
         "url": "https://www.nbcsports.com/edge/rss/football/nfl/player-news",
         "enabled": true
       },
       {
-        "name": "Yahoo NFL",
+        "name": "Yahoo Sports",
         "url": "https://sports.yahoo.com/nfl/rss/",
         "enabled": true
       },
       {
-        "name": "Fox Sports NFL",
+        "name": "Fox Sports",
         "url": "https://api.foxsports.com/v2/content/optimized-rss?partnerKey=MB0Wehpmuj2lUhuRhQaafhBjAJqaPU244mlTDK1i&size=30&tags=fs/nfl",
         "enabled": true
       },
       {
-        "name": "NYT Athletic NFL",
+        "name": "The Athletic",
         "url": "https://www.nytimes.com/athletic/rss/nfl/",
         "enabled": true
       },
       {
-        "name": "CBS Sports NFL",
+        "name": "CBS Sports",
         "url": "https://www.cbssports.com/rss/headlines/nfl/",
         "enabled": true
       },
       {
-        "name": "Bleacher Report NFL",
+        "name": "Bleacher Report",
         "url": "https://bleacherreport.com/articles/feed?tag_id=16",
         "enabled": true
       },
       {
-        "name": "USA Today NFL",
+        "name": "USA Today",
         "url": "https://www.usatoday.com/sports/nfl/rss/",
         "enabled": true
       }
@@ -211,324 +211,6 @@
       "Washington Commanders": [
         "https://www.commanders.com/rss/news"
       ]
-    }
-  },
-  "injury_analysis": {
-    "reels": [
-      {
-        "player": "Mike Evans",
-"injury_type": "Clavicle Fracture",
-"team": "Tampa Bay Buccaneers",
-"url": "https://www.instagram.com/reel/DQEowelDS8S/",
-"summary": "Clavicle fractures in NFL"
-},
-{
-"player": "Emeka Egbuka",
-"injury_type": "Hamstring",
-"team": "Ohio State Buckeyes",
-"url": "https://www.instagram.com/reel/DQCY72jDemz/",
-"summary": "Hamstring return timelines"
-},
-{
-"player": "Mike Evans",
-"injury_type": "Concussion",
-"team": "Tampa Bay Buccaneers",
-"url": "https://www.instagram.com/reel/DQDSg_oDDLV/",
-"summary": "Concussion protocol"
-},
-{
-"player": "Josh Jacobs",
-"injury_type": "Calf",
-"team": "Green Bay Packers",
-"url": "https://www.instagram.com/reel/DP_e4HrjX1t/",
-"summary": "Calf injury update"
-      }
-    ]
-  },
-  "player_highlights": {
-    "Baltimore Ravens": {
-      "Lamar Jackson": {
-        "position": "QB",
-        "number": "8",
-        "videos": [
-          "retoc5v1Z5o",
-          "V7YKrnBlBV4",
-          "fY4rhZFYcvg",
-          "5uBL7M3_5xk"
-        ]
-      },
-      "Derrick Henry": {
-        "position": "RB",
-        "number": "22",
-        "videos": [
-          "3Yf-w9HWrQ0",
-          "1qd3aVyRh9Q",
-          "5wdtVeyXNFE",
-          "hYuwbbJT_dM"
-        ]
-      },
-      "Zay Flowers": {
-        "position": "WR",
-        "number": "4",
-        "videos": [
-          "y3VMxGSno1I",
-          "3A4LeR2YH2c",
-          "kHQj8yj03cQ",
-          "CprvZA6mCts"
-        ]
-      }
-    },
-    "Cincinnati Bengals": {
-      "Joe Burrow": {
-        "position": "QB",
-        "number": "9",
-        "videos": [
-          "a06Dhx5S8Gk",
-          "ezPfjBevExw",
-          "Yp8AvhodS18",
-          "UE2l2S3MBK8"
-        ]
-      },
-      "Chase Brown": {
-        "position": "RB",
-        "number": "30",
-        "videos": [
-          "vfQJ_qKYF9Y",
-          "9L8JvZJr9W4",
-          "J5WGn8sXMHk",
-          "y6KYm57utrg"
-        ]
-      },
-      "Ja'Marr Chase": {
-        "position": "WR",
-        "number": "1",
-        "videos": [
-          "-dcfUqQi-D4",
-          "cGksXKrXECA",
-          "Qsi2MErml7U",
-          "k50Q_FZAxsw"
-        ]
-      },
-      "Tee Higgins": {
-        "position": "WR",
-        "number": "5",
-        "videos": [
-          "9iDcZgsLxko",
-          "IW3m9izEiA0",
-          "xhzV6dw6vMw",
-          "bVufOOar0IE"
-        ]
-      },
-      "Mike Gesicki": {
-        "position": "TE",
-        "number": "88",
-        "videos": [
-          "DIPk9Zow5Jk",
-          "ZlWDZDka05s",
-          "ltCjZ8zPgVE",
-          "RlsGroqM7Bg"
-        ]
-      }
-    },
-    "Philadelphia Eagles": {
-      "Jalen Hurts": {
-        "position": "QB",
-        "number": "1",
-        "videos": [
-          "nzcLH5xtp-k",
-          "x02OXwGdYHI",
-          "ZBKXKxkJUCg",
-          "YadasD8OkjY"
-        ]
-      },
-      "Saquon Barkley": {
-        "position": "RB",
-        "number": "26",
-        "videos": [
-          "gglomm0PmDY",
-          "SxRJJjiMQQ0",
-          "SI7kxWlG1SI",
-          "M5DqblKmuj8"
-        ]
-      },
-      "A.J. Brown": {
-        "position": "WR",
-        "number": "11",
-        "videos": [
-          "1z-rTov8EKo",
-          "jffwmYbMtm0",
-          "K-Y3_R6iCic",
-          "6xTPnoreoEI"
-        ]
-      },
-      "DeVonta Smith": {
-        "position": "WR",
-        "number": "6",
-        "videos": [
-          "3kXTISAfIPU",
-          "5zMzLdd4wh4",
-          "fTvc2Aw-UZ4",
-          "kuRJEzJN_jc"
-        ]
-      },
-      "Dallas Goedert": {
-        "position": "TE",
-        "number": "88",
-        "videos": [
-          "yixhK87d7sQ",
-          "rgDLqO5Vi34",
-          "bswa980Kiug",
-          "n6vDVCLvAkA"
-        ]
-      }
-    },
-    "Buffalo Bills": {
-      "Josh Allen": {
-        "position": "QB",
-        "number": "17",
-        "videos": [
-          "oLh1yiKDOvg",
-          "25kHiESCgOs",
-          "jxZLukUcBDM",
-          "hgHaI2X7mNk"
-        ]
-      },
-      "James Cook": {
-        "position": "RB",
-        "number": "4",
-        "videos": [
-          "qxFYkP_GPkE",
-          "Svm5CLYQw6A",
-          "IqU5NjzCz5g",
-          "MYTM-hz-y2Y"
-        ]
-      }
-    },
-    "Miami Dolphins": {
-      "Tyreek Hill": {
-        "position": "WR",
-        "number": "10",
-        "videos": [
-          "AeXSaUJ3N3E",
-          "5HIiABcAgYI",
-          "HzITlo86_w8",
-          "ojjJB5QPPrI"
-        ]
-      }
-    },
-    "New York Jets": {
-      "Justin Fields": {
-        "position": "QB",
-        "number": "1",
-        "videos": [
-          "2WWirSHPVE4",
-          "oAd_eleUx_M",
-          "QFkJ-SVHmis",
-          "FkTbNYznsAc"
-        ]
-      },
-      "Breece Hall": {
-        "position": "RB",
-        "number": "20",
-        "videos": [
-          "kkStBxhm7uw",
-          "QMeUMUCQnVo",
-          "SqBCYs12Bg0",
-          "nU_6lECY-zs"
-        ]
-      },
-      "Garrett Wilson": {
-        "position": "WR",
-        "number": "5",
-        "videos": [
-          "rkX86lCP41M",
-          "KGrF1m6RWVA",
-          "k_dB3f-dVog",
-          "ER9MHEq4GIc"
-        ]
-      }
-    },
-    "Washington Commanders": {
-      "Jayden Daniels": {
-        "position": "QB",
-        "number": "5",
-        "videos": [
-          "Lsq6gEhPceI",
-          "9B9wnxQx8TU",
-          "XtUtqs_5H8I",
-          "4jZSPRiSMjQ"
-        ]
-      },
-      "Terry McLaurin": {
-        "position": "WR",
-        "number": "17",
-        "videos": [
-          "vf15_jCiYnI",
-          "giQVwqFZ_xI",
-          "obzgVSexFJs",
-          "joScjugdANM"
-        ]
-      }
-    },
-    "Chicago Bears": {
-      "Caleb Williams": {
-        "position": "QB",
-        "number": "18",
-        "videos": [
-          "pgVK10pMhKs",
-          "30zwMCuulm4",
-          "ukNEXjhEgPI",
-          "6ktG76jV4MU"
-        ]
-      }
-    },
-    "Kansas City Chiefs": {
-      "Patrick Mahomes": {
-        "position": "QB",
-        "number": "15",
-        "videos": [
-          "HNjkcuhNICo",
-          "nb4lGjR7Sac",
-          "6Hba74OMkNk",
-          "8M5NWaZ_MdQ"
-        ]
-      }
-    },
-    "San Francisco 49ers": {
-      "Christian McCaffrey": {
-        "position": "RB",
-        "number": "23",
-        "videos": [
-          "qaqM0zXw-Kw",
-          "QlHNDmr8j2Y",
-          "Y_2neA4brd0",
-          "FLIAyxmjrTg"
-        ]
-      }
-    },
-    "Minnesota Vikings": {
-      "Justin Jefferson": {
-        "position": "WR",
-        "number": "18",
-        "videos": [
-          "Mx1VYwCK5ZM",
-          "eS6kjK7XOlE",
-          "2z3KvJEbmjE",
-          "Z0C8ZghQo34"
-        ]
-      }
-    },
-    "Atlanta Falcons": {
-      "Bijan Robinson": {
-        "position": "RB",
-        "number": "7",
-        "videos": [
-          "69BpmT0mphs",
-          "XCujkL0HXE4",
-          "MaQHqI_r7g4",
-          "54HDtTh4yUI"
-        ]
-      }
     }
   }
 }
