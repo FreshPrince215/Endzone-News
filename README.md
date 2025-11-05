@@ -8,7 +8,7 @@ A professional, real-time news aggregation platform that consolidates NFL news f
 
 ## 🎯 Project Overview
 
-This application solves the problem of information overload in sports news by aggregating content from multiple sources, intelligently categorizing it by team, and presenting it in a clean, filterable interface. Perfect for NFL fans, sports journalists, and fantasy football enthusiasts who need to stay updated without visiting dozens of websites.
+This application solves the problem of information overload in sports news by aggregating content from multiple sources, intelligently categorizing it by team, and presenting it in a clean, filterable interface. 
 
 ## ✨ Key Features
 
@@ -26,15 +26,11 @@ This application solves the problem of information overload in sports news by ag
 
 ### 🔍 Advanced Filtering & Sorting
 - **Team Filter**: Focus on specific teams or view league-wide news
-- **Source Filter**: Narrow down to preferred news outlets
 - **Sorting Options**: View articles by newest or oldest first
 - **Smart Search**: Automatic team detection from article headlines
 
 ### 📊 Analytics Dashboard
 - **Total Articles**: Track the volume of news coverage
-- **Teams Covered**: See which teams have recent news
-- **Source Diversity**: Monitor the number of active news sources
-- **24-Hour Activity**: Track breaking news in the last day
 
 ### 🚀 Performance Optimization
 - **Parallel Processing**: Concurrent feed fetching using ThreadPoolExecutor
