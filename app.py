@@ -73,52 +73,77 @@ class RSSFeedFetcher:
             text = text[:300] + '...'
         return text
     
-    def fetch_feed(self, url: str, source_name: str = "") -> List[Dict]:
-        """Fetch a single RSS feed with comprehensive error handling"""
-        try:
-            feed = feedparser.parse(url, request_headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            })
-            
-            if not feed.entries:
-                self.failed_fetches += 1
-                return []
-            
-            articles = []
-            for entry in feed.entries[:self.max_entries]:
-                title = entry.get('title', '').strip()
-                link = entry.get('link', '')
-                
-                if not title or not link:
-                    continue
-                
-                pub_parsed = entry.get('published_parsed') or entry.get('updated_parsed')
-                if pub_parsed:
-                    try:
-                        pub_date = datetime(*pub_parsed[:6])
-                    except:
-                        pub_date = datetime.now()
-                else:
-                    pub_date = datetime.now()
-                
-                if pub_date >= self.cutoff_date:
-                    summary = entry.get('summary', entry.get('description', ''))
-                    summary = self.sanitize_html_content(summary)
-                    
-                    articles.append({
-                        'title': title,
-                        'link': link,
-                        'published': pub_date,
-                        'source': source_name,
-                        'summary': summary
-                    })
-            
-            self.successful_fetches += 1
-            return articles
-            
-        except Exception as e:
+   def fetch_feed(self, url: str, source_name: str = "") -> List[Dict]:
+    """Fetch a single RSS feed with comprehensive error handling"""
+    try:
+        feed = feedparser.parse(url, request_headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        })
+        
+        if not feed.entries:
             self.failed_fetches += 1
             return []
+        
+        articles = []
+        for entry in feed.entries[:self.max_entries]:
+            title = entry.get('title', '').strip()
+            link = entry.get('link', '')
+            
+            if not title or not link:
+                continue
+            
+            # IMPROVED DATE PARSING
+            pub_date = None
+            
+            # Try published_parsed first, then updated_parsed
+            pub_parsed = entry.get('published_parsed') or entry.get('updated_parsed')
+            
+            if pub_parsed:
+                try:
+                    # Convert struct_time to datetime properly
+                    import time
+                    pub_date = datetime.fromtimestamp(time.mktime(pub_parsed))
+                except (ValueError, OverflowError, OSError):
+                    pass
+            
+            # If parsing failed or no date found, try string parsing
+            if pub_date is None:
+                for date_field in ['published', 'updated']:
+                    date_str = entry.get(date_field, '')
+                    if date_str:
+                        try:
+                            from email.utils import parsedate_to_datetime
+                            pub_date = parsedate_to_datetime(date_str)
+                            break
+                        except:
+                            pass
+            
+            # Fall back to current time if all parsing failed
+            if pub_date is None:
+                pub_date = datetime.now()
+            
+            # Ensure pub_date is timezone-naive for comparison
+            if pub_date.tzinfo is not None:
+                pub_date = pub_date.replace(tzinfo=None)
+            
+            if pub_date >= self.cutoff_date:
+                summary = entry.get('summary', entry.get('description', ''))
+                summary = self.sanitize_html_content(summary)
+                
+                articles.append({
+                    'title': title,
+                    'link': link,
+                    'published': pub_date,
+                    'source': source_name,
+                    'summary': summary
+                })
+        
+        self.successful_fetches += 1
+        return articles
+        
+    except Exception as e:
+        self.failed_fetches += 1
+        return []
     
     def fetch_multiple_feeds(self, feeds: List[Tuple[str, str]], max_workers: int = 10) -> List[Dict]:
         """Fetch multiple RSS feeds in parallel for improved performance"""
