@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import List, Dict, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from email.utils import parsedate_to_datetime
+import pytz
 import streamlit as st
 
 # =============================================================================
@@ -86,6 +87,10 @@ class RSSFeedFetcher:
                 self.failed_fetches += 1
                 return []
             
+            # Define EST timezone
+            est = pytz.timezone('US/Eastern')
+            utc = pytz.UTC
+            
             articles = []
             for entry in feed.entries[:self.max_entries]:
                 title = entry.get('title', '').strip()
@@ -94,7 +99,7 @@ class RSSFeedFetcher:
                 if not title or not link:
                     continue
                 
-                # IMPROVED DATE PARSING
+                # IMPROVED DATE PARSING WITH EST CONVERSION
                 pub_date = None
                 
                 # Try published_parsed first, then updated_parsed
@@ -102,8 +107,8 @@ class RSSFeedFetcher:
                 
                 if pub_parsed:
                     try:
-                        # Convert struct_time to datetime properly
-                        pub_date = datetime.fromtimestamp(time.mktime(pub_parsed))
+                        # Convert struct_time to UTC datetime
+                        pub_date = datetime.fromtimestamp(time.mktime(pub_parsed), tz=utc)
                     except (ValueError, OverflowError, OSError):
                         pass
                 
@@ -114,26 +119,31 @@ class RSSFeedFetcher:
                         if date_str:
                             try:
                                 pub_date = parsedate_to_datetime(date_str)
+                                # If timezone-naive, assume UTC
+                                if pub_date.tzinfo is None:
+                                    pub_date = utc.localize(pub_date)
                                 break
                             except:
                                 pass
                 
-                # Fall back to current time if all parsing failed
+                # Fall back to current time in UTC if all parsing failed
                 if pub_date is None:
-                    pub_date = datetime.now()
+                    pub_date = datetime.now(utc)
                 
-                # Ensure pub_date is timezone-naive for comparison
-                if pub_date.tzinfo is not None:
-                    pub_date = pub_date.replace(tzinfo=None)
+                # Convert to EST
+                pub_date_est = pub_date.astimezone(est)
                 
-                if pub_date >= self.cutoff_date:
+                # Make timezone-naive for storage and comparison
+                pub_date_naive = pub_date_est.replace(tzinfo=None)
+                
+                if pub_date_naive >= self.cutoff_date:
                     summary = entry.get('summary', entry.get('description', ''))
                     summary = self.sanitize_html_content(summary)
                     
                     articles.append({
                         'title': title,
                         'link': link,
-                        'published': pub_date,
+                        'published': pub_date_naive,
                         'source': source_name,
                         'summary': summary
                     })
@@ -646,7 +656,7 @@ def render_metrics_dashboard(df: pd.DataFrame):
 
 def render_news_article(row: pd.Series):
     """Render individual news article card"""
-    date_str = row['date'].strftime('%b %d, %Y')
+    date_str = row['date'].strftime('%b %d, %Y %I:%M %p EST')
     
     summary_html = f"<div class='article-summary'>{row['summary']}</div>" if row['summary'] else ""
     
