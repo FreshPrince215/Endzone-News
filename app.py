@@ -73,7 +73,7 @@ class RSSFeedFetcher:
             text = text[:300] + '...'
         return text
     
-   def fetch_feed(self, url: str, source_name: str = "") -> List[Dict]:
+    def fetch_feed(self, url: str, source_name: str = "") -> List[Dict]:
         """Fetch a single RSS feed with comprehensive error handling"""
         try:
             feed = feedparser.parse(url, request_headers={
