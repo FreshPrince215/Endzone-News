@@ -15,7 +15,7 @@ This application solves the problem of information overload in sports news by ag
 ### 📰 Multi-Source Aggregation
 - **10+ News Sources**: ESPN, NFL.com, Yahoo Sports, CBS Sports, The Athletic, NBC Sports, Fox Sports, Bleacher Report, USA Today, and more
 - **32 Team-Specific Feeds**: Direct feeds from official team websites and trusted team blogs
-- **Real-Time Updates**: Automatic content refresh every 30 minutes with smart caching
+- **Near-Real-Time Updates**: Automatic content refresh every 30 minutes with smart caching
 - **80+ RSS Feeds**: Comprehensive coverage across the entire NFL landscape
 
 ### 🎨 Modern User Interface
