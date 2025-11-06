@@ -1,6 +1,6 @@
-# 🏈 NFL News Aggregator Project 
+# 🏈 Football News Aggregator Project 
 
-Real-time news aggregation platform that consolidates NFL news from 10+ major sports media sources into a single, streamlined interface. Built with Python and Streamlit, featuring dark/light mode themes and advanced filtering capabilities.
+Real-time news aggregation platform that consolidates Football news from 10+ major sports media sources into a single, streamlined interface. Built with Python and Streamlit, featuring dark/light mode themes and advanced filtering capabilities.
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)
@@ -108,70 +108,7 @@ This application solves the problem of information overload in sports news by ag
 
 ### Step-by-Step Setup
 
-1. **Clone the repository**
-```bash
-git clone https://github.com/yourusername/nfl-news-aggregator.git
-cd nfl-news-aggregator
-```
 
-2. **Create a virtual environment** (recommended)
-```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
-```
-
-3. **Install dependencies**
-```bash
-pip install streamlit feedparser pandas
-```
-
-Or use requirements.txt:
-```bash
-pip install -r requirements.txt
-```
-
-4. **Verify file structure**
-```
-nfl-news-aggregator/
-├── app.py              # Main application file
-├── config.json         # Configuration and RSS feeds
-├── requirements.txt    # Python dependencies
-└── README.md          # This file
-```
-
-5. **Run the application**
-```bash
-streamlit run app.py
-```
-
-6. **Access the application**
-Open your web browser and navigate to:
-```
-http://localhost:8501
-```
-
-## ⚙️ Configuration
-
-The `config.json` file controls all application settings and data sources.
-
-### Application Settings
-
-```json
-{
-  "app": {
-    "title": "NFL News Aggregator",
-    "page_icon": "🏈",
-    "cache_ttl": 1800,        // Cache duration in seconds (30 min)
-    "days_lookback": 7,        // How many days of news to fetch
-    "max_workers": 10          // Parallel thread pool size
-  }
-}
-```
 
 ### Adding Custom RSS Feeds
 
@@ -194,14 +131,6 @@ The `config.json` file controls all application settings and data sources.
 }
 ```
 
-### Customization Options
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `cache_ttl` | How long to cache data (seconds) | 1800 (30 min) |
-| `days_lookback` | Number of days of historical news | 7 |
-| `max_workers` | Parallel thread pool size | 10 |
-| `enabled` | Enable/disable specific feeds | true |
 
 ## 🎨 Usage Guide
 
@@ -267,20 +196,6 @@ render_news_article()       # Individual article cards
 
 ## 📊 Features in Detail
 
-### Intelligent Team Detection
-
-The system uses a comprehensive keyword mapping to automatically categorize articles:
-
-```python
-team_keyword_mapping = {
-    'RAVENS': 'Baltimore Ravens',
-    'BILLS': 'Buffalo Bills',
-    'CHIEFS': 'Kansas City Chiefs',
-    # ... 32 teams total
-}
-```
-
-When an article title contains "Ravens dominate Bengals", the system automatically tags it as Baltimore Ravens news.
 
 ### Content Deduplication
 
@@ -329,11 +244,6 @@ This reduces total fetch time from ~30 seconds to ~3 seconds.
 
 Enable Streamlit debug mode for detailed error messages:
 
-```bash
-streamlit run app.py --logger.level=debug
-```
-
-## 🚀 Deployment
 
 ### Streamlit Cloud (Free)
 
@@ -343,16 +253,6 @@ streamlit run app.py --logger.level=debug
 4. Select repository and branch
 5. Click "Deploy"
 
-### Heroku
-
-```bash
-# Create Procfile
-echo "web: streamlit run app.py --server.port=$PORT" > Procfile
-
-# Deploy
-heroku create nfl-news-aggregator
-git push heroku main
-```
 
 ### Docker
 
@@ -375,8 +275,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Your Name**
-- LinkedIn: [your-linkedin-profile](https://linkedin.com/in/yourprofile)
-- GitHub: [@yourusername](https://github.com/FreshPrince215)
+- LinkedIn: [Eric Walker](https://linkedin.com/in/eric-walker-bba9b2198)
+- GitHub: [FreshPrince215](https://github.com/FreshPrince215)
 
 
 ## 🙏 Acknowledgments
@@ -386,22 +286,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Sports Media Outlets** - ESPN, Yahoo, CBS, NBC, Fox, and others
 - **Open Source Community** - For the incredible Python ecosystem
 
-## 📚 Additional Resources
 
-- [Streamlit Documentation](https://docs.streamlit.io/)
-- [Feedparser Documentation](https://feedparser.readthedocs.io/)
-- [Pandas Documentation](https://pandas.pydata.org/docs/)
-- [NFL API Documentation](https://www.nfl.com/feeds/)
 
-## 💡 Project Showcase
-
-This project demonstrates proficiency in:
-- **Data Engineering**: RSS feed aggregation, ETL pipelines, data deduplication
-- **Backend Development**: Python, parallel processing, caching strategies
-- **Frontend Development**: Streamlit, responsive design, dark/light themes
-- **Software Architecture**: Modular design, separation of concerns, scalability
-- **DevOps**: Configuration management, error handling, deployment ready
-
-Perfect for demonstrating full-stack capabilities to potential employers!
 
 ---
