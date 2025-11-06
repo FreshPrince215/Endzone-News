@@ -3,10 +3,12 @@ import pandas as pd
 import json
 import hashlib
 import re
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from email.utils import parsedate_to_datetime
 import streamlit as st
 
 # =============================================================================
@@ -101,7 +103,6 @@ class RSSFeedFetcher:
                 if pub_parsed:
                     try:
                         # Convert struct_time to datetime properly
-                        import time
                         pub_date = datetime.fromtimestamp(time.mktime(pub_parsed))
                     except (ValueError, OverflowError, OSError):
                         pass
@@ -112,7 +113,6 @@ class RSSFeedFetcher:
                         date_str = entry.get(date_field, '')
                         if date_str:
                             try:
-                                from email.utils import parsedate_to_datetime
                                 pub_date = parsedate_to_datetime(date_str)
                                 break
                             except:
