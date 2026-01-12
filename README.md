@@ -99,27 +99,8 @@ This application solves the problem of information overload in sports news by ag
 8. **Filtering & Sorting**: Real-time data manipulation based on user selections
 9. **Rendering**: Dynamic HTML generation with theme-aware CSS
 
-## 📦 Installation
 
-### Prerequisites
-- Python 3.8 or higher
-- pip package manager
-- Internet connection for RSS feeds
-
-### Step-by-Step Setup
-
-
-
-### Adding Custom RSS Feeds
-
-**General News Source:**
-```json
-{
-  "name": "Your Source Name",
-  "url": "https://example.com/rss/feed",
-  "enabled": true
-}
-```
+### Adding RSS Feeds
 
 **Team-Specific Feed:**
 ```json
@@ -254,32 +235,19 @@ Enable Streamlit debug mode for detailed error messages:
 5. Click "Deploy"
 
 
-### Docker
 
-```dockerfile
-FROM python:3.9-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 8501
-CMD ["streamlit", "run", "app.py"]
-```
-
-
-
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👨‍💻 Author
+##  Author
 
 **Your Name**
 - LinkedIn: [Eric Walker](https://linkedin.com/in/eric-walker-bba9b2198)
 - GitHub: [FreshPrince215](https://github.com/FreshPrince215)
 
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - **Streamlit** - For the amazing web app framework
 - **NFL Teams** - For providing official RSS feeds
